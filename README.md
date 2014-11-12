@@ -1,8 +1,7 @@
 DCEMRI.jl
 =========
 
-Julia language tools for rapid analysis of dynamic contrast enhanced magnetic resonance imaging
-(DCE MRI) data.
+A Fast, Validated Toolkit for Dynamic Contrast Enhanced MRI Analysis
 
 ## Why Julia?
 

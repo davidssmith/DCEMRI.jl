@@ -1,0 +1,21 @@
+#!/Users/dss/git/julia/julia
+#
+# This script wraps the model in a form that can be invoked from the
+# command line. You can use this to batch process files from either
+# the shell or from any language that can call system commands, such
+# as Matlab.
+#
+# To get the usage information, run "dcefit -h".
+
+using DCEMRI
+
+params = length(ARGS) > 0 ? parsefromargs() : defaultdict()
+
+# set up parallel workers, fit routines will use as many as are available
+println("starting workers")
+if nworkers() < params["workers"]
+  addprocs(nworkers() == 1 ? params["workers"] : params["workers"] - nworkers())
+end
+@everywhere using DCEMRI
+
+runmodel(params)

@@ -1,0 +1,31 @@
+This file provides information about the data set in the directory T1_mapping_v3
+
+Two sets of images are provided.  DICOM part 10 format images are in the DICOM directory.  XML files are in the XML directory.  
+The XML images allow the values for the DICOM tags to be altered using a text editor, and new DICOM images can then be generated using dcm4che's tool called "xml2dcm," availabie at http://www.dcm4che.org/confluence/display/d2/dcm4che2+DICOM+Toolkit.
+
+The parameters used to generate this data are:
+
+Repetition Time = 5 msecs
+Assumed T1 (in tissue) = 1000 msecs
+Assumed equilibrium magnetization (in tissue) = 1000
+Assumed T1 (in blood vessel) = 1440 msecs
+Assumed equilibrium magnetization (in blood vessel) = 1000
+
+
+The signal intensity images were generated for the following different flip angles: 3, 6, 9, 15, 24, 35 degrees. The files in the zip folder have the 
+following flip angles:
+
+filename	flip angle (in degrees)
+fa3		3 
+fa6		6 
+fa9		9
+fa15		15
+fa24		24
+fa35		35
+
+
+The signal intensity for the T1 mapping images was calculated using Equation 1 in the paper Comparison of three physiologically-based pharmacokinetic models for the prediction of contrast agent distribution measured by dynamic MR imaging, 
+Barboriak DP, MacFall JR, Viglianti BL, Dewhirst MW. J Magn Reson Imaging. 2008 Jun;27(6):1388-98.
+
+The data in the test image is organized as follows: The top 60*180 pixels in the image represent the tissue. The vascular region of interest is the 
+bottom 60*20 pixels strip of the image.  

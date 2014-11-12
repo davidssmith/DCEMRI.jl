@@ -1,0 +1,147 @@
+This file provides information about the data set in the folder Dynamic_v3
+
+Two sets of images are provided.  DICOM part 10 format images are in the DICOM directory.  XML files are in the XML directory.  
+The XML images allow the values for the DICOM tags to be altered using a text editor, and new DICOM images can then be generated using dcm4che's tool called "xml2dcm," availabie at http://www.dcm4che.org/confluence/display/d2/dcm4che2+DICOM+Toolkit.
+
+The parameters used to generate this data are:
+
+Flip angle = 25 degrees
+Repetition Time = 5 msecs
+Time interval between the DCE images = 0.5 seconds
+Assumed T1 (in tissue) = 1000 msecs
+Assumed equilibrium magnetization (in tissue) = 1000
+Assumed T1 (in blood vessel) = 1440 msecs
+Assumed equilibrium magnetization (in blood vessel) = 1000
+Timing information is included in the DICOM header at field 0008,0032 (Acquisition Time)
+
+The input function was derived from the model Dispersion_v01_a_20080619.proj (available on this website at http://dblab.duhs.duke.edu/modules/PhysiologicalModels/index.php?id=3)
+No patient size adjustment was used.  A 0.1 mmol/kg dose was assumed for a 70 kg individual injected at 1.5 mmol/sec.
+The input function used from this model to create the vascular region of interest was CBrAout. This function
+representing a blood concentration time curve was converted to a plasma concentration time curve assuming a blood
+hematocrit of 45%.
+
+The data in the test image is organized as follows: 
+
+The testdata is generated using several combinations of Ktrans,Ve and Vp, using the modified Tofts
+Kermode model.
+The Ktrans takes values 0,0.01,0.02,0.05,0.1,0.2. The Ve takes values 0.1,0.2,0.5. The Vp takes values 
+0.001,0.005,0.01,0.02,0.05,0.1. The test data contains 10*10 pixel patches of each Ktrans, Ve and Vp combination. 
+While generating the test data, the Ktrans values {0,0.01,0.02,0.05,0.1,0.2} vary along the x direction. Along the y 
+direction, Ve varies first and takes values {0.1,0.2,0.5}. Then, Vp varies and takes 
+values {0.001,0.005,0.01,0.02,0.05,0.1}. Each pixel patch is 10*10.
+
+The Vascular region of interest is the bottom 60*20 pixels strip of the image.  
+
+The following is a detailed list giving the specific Ktrans,Ve,Vp combination used to generate each 10*10 pixel patch.
+The x,y location specify the upper-left corner of each 10*10 pixel patch containing a specific Ktrans, Ve and Vp 
+combination.
+
+x    	y   	Ktrans   Ve	Vp
+0	0	0	0.1	0.001
+10	0	0.01	0.1	0.001
+20	0	0.02	0.1	0.001
+30	0	0.05	0.1	0.001
+40	0	0.1	0.1	0.001
+50	0	0.2	0.1	0.001
+0	10	0	0.2	0.001
+10	10	0.01	0.2	0.001
+20	10	0.02	0.2	0.001
+30	10	0.05	0.2	0.001
+40	10	0.1	0.2	0.001
+50	10	0.2	0.2	0.001
+0	20	0	0.5	0.001
+10	20	0.01	0.5	0.001
+20	20	0.02	0.5	0.001
+30	20	0.05	0.5	0.001
+40	20	0.1	0.5	0.001
+50	20	0.2	0.5	0.001
+0	30	0	0.1	0.005
+10	30	0.01	0.1	0.005
+20	30	0.02	0.1	0.005
+30	30	0.05	0.1	0.005
+40	30	0.1	0.1	0.005
+50	30	0.2	0.1	0.005
+0	40	0	0.2	0.005
+10	40	0.01	0.2	0.005
+20	40	0.02	0.2	0.005
+30	40	0.05	0.2	0.005
+40	40	0.1	0.2	0.005
+50	40	0.2	0.2	0.005
+0	50	0	0.5	0.005
+10	50	0.01	0.5	0.005
+20	50	0.02	0.5	0.005
+30	50	0.05	0.5	0.005
+40	50	0.1	0.5	0.005
+50	50	0.2	0.5	0.005
+0	60	0	0.1	0.01
+10	60	0.01	0.1	0.01
+20	60	0.02	0.1	0.01
+30	60	0.05	0.1	0.01
+40	60	0.1	0.1	0.01
+50	60	0.2	0.1	0.01
+0	70	0	0.2	0.01
+10	70	0.01	0.2	0.01
+20	70	0.02	0.2	0.01
+30	70	0.05	0.2	0.01
+40	70	0.1	0.2	0.01
+50	70	0.2	0.2	0.01
+0	80	0	0.5	0.01
+10	80	0.01	0.5	0.01
+20	80	0.02	0.5	0.01
+30	80	0.05	0.5	0.01
+40	80	0.1	0.5	0.01
+50	80	0.2	0.5	0.01
+0	90	0	0.1	0.02
+10	90	0.01	0.1	0.02
+20	90	0.02	0.1	0.02
+30	90	0.05	0.1	0.02
+40	90	0.1	0.1	0.02
+50	90	0.2	0.1	0.02
+0	100	0	0.2	0.02
+10	100	0.01	0.2	0.02
+20	100	0.02	0.2	0.02
+30	100	0.05	0.2	0.02
+40	100	0.1	0.2	0.02
+50	100	0.2	0.2	0.02
+0	110	0	0.5	0.02
+10	110	0.01	0.5	0.02
+20	110	0.02	0.5	0.02
+30	110	0.05	0.5	0.02
+40	110	0.1	0.5	0.02
+50	110	0.2	0.5	0.02
+0	120	0	0.1	0.05
+10	120	0.01	0.1	0.05
+20	120	0.02	0.1	0.05
+30	120	0.05	0.1	0.05
+40	120	0.1	0.1	0.05
+50	120	0.2	0.1	0.05
+0	130	0	0.2	0.05
+10	130	0.01	0.2	0.05
+20	130	0.02	0.2	0.05
+30	130	0.05	0.2	0.05
+40	130	0.1	0.2	0.05
+50	130	0.2	0.2	0.05
+0	140	0	0.5	0.05
+10	140	0.01	0.5	0.05
+20	140	0.02	0.5	0.05
+30	140	0.05	0.5	0.05
+40	140	0.1	0.5	0.05
+50	140	0.2	0.5	0.05
+0	150	0	0.1	0.1
+10	150	0.01	0.1	0.1
+20	150	0.02	0.1	0.1
+30	150	0.05	0.1	0.1
+40	150	0.1	0.1	0.1
+50	150	0.2	0.1	0.1
+0	160	0	0.2	0.1
+10	160	0.01	0.2	0.1
+20	160	0.02	0.2	0.1
+30	160	0.05	0.2	0.1
+40	160	0.1	0.2	0.1
+50	160	0.2	0.2	0.1
+0	170	0	0.5	0.1
+10	170	0.01	0.5	0.1
+20	170	0.02	0.5	0.1
+30	170	0.05	0.5	0.1
+40	170	0.1	0.5	0.1
+50	170	0.2	0.5	0.1

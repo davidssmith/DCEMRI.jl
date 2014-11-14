@@ -15,7 +15,16 @@ Put simply, it looks like Matlab, which is simple to learn and familiar to most 
 
 ### Julia
 
-I've tried to keep the software dependencies to a minimum.  So to run this code you must install only the Julia programming language. Julia can be downloaded from [julialang.org](http://julialang.org/downloads/) as pre-compiled binaries or cloned from the [github repository](https://github.com/JuliaLang/julia).  If you clone the Julia github repo, you should be able to make it with a simple `make` command in the top-level source directory.  The compilation might take a while, but it is completely automatic.  See the [Julia readme](https://github.com/JuliaLang/julia/blob/master/README.md) for compilation instructions. In particular, you must have a [number of development tools](https://github.com/JuliaLang/julia#required-build-tools-and-external-libraries) installed. 
+I've tried to keep the software dependencies to a minimum.  So to run this
+code you must install only the Julia programming language. Julia can be
+downloaded from [julialang.org](http://julialang.org/downloads/) as
+pre-compiled binaries or cloned from the [github
+repository](https://github.com/JuliaLang/julia).  See the [Julia
+readme](https://github.com/JuliaLang/julia/blob/master/README.md) for
+compilation instructions. In particular, you must have a [number of
+development
+tools](https://github.com/JuliaLang/julia#required-build-tools-and-external-libraries)
+installed.
 
 Once you have the base Julia install working, go ahead and start it up.  You might need to set your PATH shell variable to point to your install location, or you may just be able to double-click the icon if you installed one of the pre-compiled binaries.
 

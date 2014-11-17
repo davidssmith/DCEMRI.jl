@@ -204,3 +204,5 @@ function runmodel(opts::Dict)
 
   results
 end
+
+runmodel( ;kwargs...) = runmodel(kwargs2dict(kwargs))

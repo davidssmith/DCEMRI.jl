@@ -106,3 +106,12 @@ function ccc(x, y)
   s12 = sum((x - m1).*(y - m2)) / length(x)
   2s12 / (s1 + s2 + (m1 - m2).^2)
 end
+
+# converts keyword argument to a dictionary
+function kwargs2dict(kwargs)
+    d = Dict{ASCIIString,Any}()
+    for (k, v) in kwargs
+        d[string(k)] = v
+    end
+    return d
+end

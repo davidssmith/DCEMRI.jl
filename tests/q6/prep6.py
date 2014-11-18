@@ -11,6 +11,8 @@ nx = 80
 ny = 50
 nt = 1321
 noise_sigma = 0.2
+random_seed = 1337
+seed(random_seed)
 dx = 1
 deltat = 1
 

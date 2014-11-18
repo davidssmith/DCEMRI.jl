@@ -11,6 +11,8 @@ TR = 5e-3   # sec
 
 removektzero = True
 noise_sigma = 0.2
+random_seed = 1337
+seed(random_seed)
 deltat = 1
 deltax = 1
 

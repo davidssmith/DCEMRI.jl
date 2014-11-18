@@ -58,6 +58,8 @@ function makeplots(mat::Dict, outdir::String; dx::Int64=1)
   clf()
   imshow(resid, interpolation="nearest", cmap="cubehelix", vmin=0)
   title("residual")
+  #yticks([0:5], [string(x) for x in [0.01,0.02,0.05,0.1,0.2,0.35]])
+  xticks([0:4], [string(x) for x in [0.01,0.02,0.05,0.1,0.2]])
   colorbar()
   savefig("$outdir/resid.pdf")
 

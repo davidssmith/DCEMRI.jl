@@ -22,7 +22,7 @@ function makeplots(mat::Dict, outdir::String; dx::Int64=1)
   xtlabels = [string(x) for x in [0.01,0.05,0.1,0.2,0.5]]
 
   # AIF
-  figure(figsize=(4,4))
+  figure(figsize=(4.5,4.5))
   clf()
   plot(mat["t"], mat["aif"], "ko-")
   xlabel("time (min)")

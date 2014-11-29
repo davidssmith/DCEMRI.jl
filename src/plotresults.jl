@@ -111,6 +111,7 @@ function makeplots(mat::Dict)
   back = (S0map - minimum(S0map)) / (maximum(S0map) - minimum(S0map))
   mask = convert(Array{Bool,2}, mat["mask"])
 
+  figure(figsize=(4.5,4.5))
   clf()
   plot(mat["t"], mat["aif"], "ko-")
   xlabel("time (min)")

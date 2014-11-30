@@ -10,7 +10,7 @@ results = runmodel(opts)
 
 println("Plotting results ...")
 include("plotresults6.jl")
-makeplots(results, "results", dx=10)
+makeplots6(results, "results", dx=10)
 
 isdir("results_noisy") || mkdir("results_noisy")
 println("Running analysis of QIBA v6 (noisy) data ...")
@@ -22,4 +22,4 @@ results = runmodel(opts)
 
 println("Plotting results ...")
 include("plotresults6.jl")
-makeplots(results, "results_noisy")
+makeplots6(results, "results_noisy")

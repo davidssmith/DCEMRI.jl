@@ -1,7 +1,7 @@
 using PyPlot
 using DCEMRI
 
-function makeplots(mat::Dict, outdir::String; dx::Int64=1)
+function makeplots6(mat::Dict, outdir::String; dx::Int64=1)
 
   R1map = mat["R1"]
   S0map = mat["S0"]

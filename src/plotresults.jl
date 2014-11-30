@@ -147,7 +147,7 @@ function makeplots(mat::Dict)
   Ct = squeeze(maximum(Ct,1),1)
   x = oplot2(clamp(Ct, 0.0, 5.0), back, mask)
   imshow(x, interpolation="nearest", cmap="jet", vmin=0, vmax=5)
-  title("max tissue concentration, \$C_t\$ (mmol)")
+  title("max tissue conc., \$C_t\$ (mmol)")
   colorbar()
   savefig("results/Ct.pdf")
 

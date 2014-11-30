@@ -83,18 +83,6 @@ function validate(matdict)
   @assert haskey(matdict, "t") "Input MAT file must contain 't' vector of time points."
 end
 
-function statsummary(data; label="")
-  isempty(label) || @dprint "Summary for $label"
-  @dprint "  N:      $(length(data))"
-  @dprint "  min:    $(minimum(data))"
-  @dprint "  Q1:     $(quantile(data[:],0.25))"
-  @dprint "  median: $(median(data))"
-  @dprint "  mean:   $(mean(data))"
-  @dprint "  Q3:     $(quantile(data[:],0.75))"
-  @dprint "  max:    $(maximum(data))"
-  @dprint "  stddev: $(std(data))"
-end
-
 function ccc(x, y)
   # concordance correlation coefficient
   x = x[:]

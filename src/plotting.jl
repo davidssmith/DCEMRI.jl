@@ -1,5 +1,4 @@
 using PyPlot
-using DCEMRI
 
 function jetrgb(x::Float64)
   y = 4x
@@ -96,8 +95,8 @@ function oplot2(front::Array{Float64,2}, back::Array{Float64,2}, mask::Array{Boo
   img
 end
 
-function makeplots(mat::Dict)
-  isdir("results") || mkdir("results")
+function makeplots(mat::Dict; outdir::String="results")
+  isdir(outdir) || mkdir(outdir)
   R1map = mat["R1"]
   S0map = mat["S0"]
   modelmap = mat["modelmap"]
@@ -118,30 +117,30 @@ function makeplots(mat::Dict)
   yticks([0:5])
   ylabel("[Gd-DTPA] (mM)")
   title("arterial input function, \$C_p\$")
-  savefig("results/aif.pdf")
+  savefig("$outdir/aif.pdf")
 
   clf()
   imshow(mat["SER"], interpolation="nearest", cmap="cubehelix", vmin=0, vmax=10)
   colorbar()
   title("signal enhancement ratio")
-  savefig("results/ser.pdf")
+  savefig("$outdir/ser.pdf")
 
   clf()
   imshow(mask, interpolation="nearest", cmap="gray")
   title("mask")
-  savefig("results/mask.pdf")
+  savefig("$outdir/mask.pdf")
 
   clf()
   imshow(R1map, interpolation="nearest", cmap="cubehelix", vmin=0, vmax=5)
   title("\$R_1\$ relaxation rate (s\$^{-1}\$)")
   colorbar(ticks=[0:5])
-  savefig("results/R1.pdf")
+  savefig("$outdir/R1.pdf")
 
   clf()
   imshow(S0map, interpolation="nearest", cmap="gray")
   title("\$S_0\$")
   colorbar()
-  savefig("results/S0.pdf")
+  savefig("$outdir/S0.pdf")
 
   clf()
   Ct = squeeze(maximum(Ct,1),1)
@@ -149,28 +148,28 @@ function makeplots(mat::Dict)
   imshow(x, interpolation="nearest", cmap="jet", vmin=0, vmax=5)
   title("max tissue conc., \$C_t\$ (mmol)")
   colorbar()
-  savefig("results/Ct.pdf")
+  savefig("$outdir/Ct.pdf")
 
   clf()
   x = oplot2(clamp(Kt, 0.0, 1.0), back, mask)
   imshow(x, interpolation="nearest", cmap="jet", vmin=0, vmax=1)
   title("\$K^\\mathrm{trans}\$ (min\$^{-1}\$)")
   colorbar(ticks=[0:2:10]/10.0)
-  savefig("results/Kt.pdf")
+  savefig("$outdir/Kt.pdf")
 
   clf()
   x = oplot2(clamp(ve, 0.0, 1.0), back, mask)
   imshow(x, interpolation="nearest", cmap="jet", vmin=0, vmax=1)
   title("\$v_e\$")
   colorbar(ticks=[0,0.2,0.4,0.6,0.8,1])
-  savefig("results/ve.pdf")
+  savefig("$outdir/ve.pdf")
 
   clf()
   x = oplot2(clamp(vp, 0.0, 1.0), back, mask)
   imshow(x, interpolation="nearest", cmap="jet", vmin=0, vmax=1)
   title("\$v_p\$")
   colorbar(ticks=[0,0.2,0.4,0.6,0.8,1])
-  savefig("results/vp.pdf")
+  savefig("$outdir/vp.pdf")
 
   clf()
   kep = clamp(Kt./ve, 0.0, 10.0)
@@ -178,13 +177,13 @@ function makeplots(mat::Dict)
   imshow(x, interpolation="nearest", cmap="jet", vmin=0, vmax=10)
   title("\$k_{ep}\$")
   colorbar(ticks=[0,2,4,6,8,10])
-  savefig("results/kep.pdf")
+  savefig("$outdir/kep.pdf")
 
   clf()
   imshow(modelmap, interpolation="nearest", cmap="cubehelix")
   title("model used")
   colorbar(ticks=[0,1,2,3])
-  savefig("results/modelmap.pdf")
+  savefig("$outdir/modelmap.pdf")
 
   clf()
   x = oplot2(clamp(100*resid, 0.0, 1.0), back, mask)
@@ -192,7 +191,7 @@ function makeplots(mat::Dict)
   title("residual \$\\times\$ 100")
   #colorbar(ticks=[0:2:10]/10000.0)
   colorbar()
-  savefig("results/resid.pdf")
+  savefig("$outdir/resid.pdf")
 end
 
 function makeplots(matfile::String)

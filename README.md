@@ -228,3 +228,7 @@ Results can be found in /Users/dss/.julia/v0.3/DCEMRI/demo/results
 ## Concluding Remarks
 
 If you've made it this far, you are ready to run the DCE analysis on your own data.  Congratulations!  If you have problems or find bugs, please file an issue on the [github repository](http://github.com/davidssmith/DCEMRI.jl) or email us.  If you find ways to make it better, please submit your improvements as well. We hope that this can become a community effort that leads to an outstanding, rock solid, trustworthy tool.
+
+## Funding Sources
+
+This project was funded by the National Cancer Institute of the National Institutes of Health, under grants K25CA176219, U01CA142565, R01CA129961, R25CA092043. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.

@@ -26,22 +26,25 @@ function parsefromargs()
     "--TR", "-r"
     help = "repetition time (ms)"
     arg_type = Float64
-    "--dceflip", "-d"
+    "--DCEflip", "-d"
     help = "flip angle of DCE data"
     arg_type = Float64
-    "--t1flip", "-t"
-    help = "flip angle(s) of T1 data"
+    "--SERcutoff", "-c"
+    help = "minimum SER to include in processing mask"
+    arg_type = Float64
+    "--T1flip", "-t"
+    help = "list of flip angle(s) of T1 data"
     arg_type = Float64
     nargs = '+'
-    "--modelflags", "-m"
-    help = "logical OR of models to try (1=plasma only, 2=Standard, 3=Extended)"
+    "--models", "-m"
+    help = "list of models: 1=plasma only, 2=Standard, 3=Extended"
     arg_type = Int64
-    default = 7
+    nargs = '+'
     "--plotting", "-p"
     help = "plot intermediate results"
     action = :store_true
     "--workers", "-w"
-    help = "number of parallel workers to use (one per CPU core is best)"
+    help = "number of parallel workers to use (one per CPU core is good)"
     arg_type = Int64
     default = 4
     "--verbose", "-v"
@@ -60,33 +63,31 @@ function parsefromargs()
   parsed_args
 end
 
-function defaultdict()
+function defaultparams()
+  # defaults to use if not specified
   opts = Dict()
-  opts["TR"] = nothing
-  opts["relaxivity"] = nothing
-  opts["dceflip"] = nothing
-  opts["modelflags"] = 7
-  opts["plotting"] = false
-  opts["outfile"] = "output.mat"
-  opts["verbose"] = true
-  opts["t1flip"] = []
-  opts["workers"] = 4
   opts["datafile"] = "input.mat"
-  opts["model"] = "standard"
+  opts["outfile"] = "output.mat"
+  opts["relaxivity"] = 4.5
+  opts["SERcutoff"] = 2.0
+  opts["models"] = [2]
+  opts["plotting"] = false
+  opts["verbose"] = true
+  opts["workers"] = 4
   opts
 end
 
-function validate(matdict)
-  @assert haskey(matdict, "aif") "Input MAT file must contain an 'aif' vector."
-  @assert (haskey(matdict, "R1map") && haskey(matdict, "S0map")) || haskey(matdict,"t1data") "Input MAT file must contain either 'R1map' and 'S0map' or 't1data'."
-  @assert haskey(matdict, "dcedata") "Input MAT file must contain 'dcedata'."
-  @assert haskey(matdict, "t") "Input MAT file must contain 't' vector of time points."
+function validate(d::Dict)
+  if !(haskey(d, "Cp") && haskey(d, "DCEdata") && haskey(d, "t") &&
+       haskey(d, "DCEflip") && haskey(d, "TR") &&
+       ((haskey(d, "R10") && haskey(d, "S0")) ||
+        (haskey(d,"T1data") && haskey(d,"T1flip"))))
+     error("Input must contain Cp, DCEdata, t, DCEflip, TR, and either R10 and S0 or T1data and T1flip.")
+  end
 end
 
-function ccc(x, y)
+function ccc{T,N}(x::Array{T,N}, y::Array{T,N})
   # concordance correlation coefficient
-  x = x[:]
-  y = y[:]
   m1 = mean(x)
   m2 = mean(y)
   s1 = var(x)*(length(x) - 1.0) / length(x)
@@ -101,5 +102,5 @@ function kwargs2dict(kwargs)
     for (k, v) in kwargs
         d[string(k)] = v
     end
-    return d
+    d
 end

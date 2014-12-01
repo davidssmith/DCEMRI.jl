@@ -59,8 +59,9 @@ Next, make sure `bin/dcefit` is executable.  It should already be, but it doesn'
 
 ```
 usage: dcefit [-O OUTFILE] [-R RELAXIVITY] [-r TR] [-d DCEFLIP]
-              [-t T1FLIP [T1FLIP...]] [-m MODELFLAGS] [-p]
-              [-w WORKERS] [-v] [-h] [datafile]
+              [-c SERCUTOFF] [-t T1FLIP [T1FLIP...]]
+              [-m MODELS [MODELS...]] [-p] [-w WORKERS] [-v] [-h]
+              [datafile]
 
 Process DCE-MRI data. Optional arguments can be used to override any
 values found in input files. For questions, contact David Smith
@@ -79,31 +80,37 @@ optional arguments:
                         contrast agent relaxivity (1/s) (type:
                         Float64)
   -r, --TR TR           repetition time (ms) (type: Float64)
-  -d, --dceflip DCEFLIP
+  -d, --DCEflip DCEFLIP
                         flip angle of DCE data (type: Float64)
-  -t, --t1flip T1FLIP [T1FLIP...]
-                        flip angle(s) of T1 data (type: Float64)
-  -m, --modelflags MODELFLAGS
-                        logical OR of models to try (1=plasma only,
-                        2=Standard, 3=Extended) (type: Int64, default:
-                        7)
+  -c, --SERcutoff SERCUTOFF
+                        minimum SER to include in processing mask
+                        (type: Float64)
+  -t, --T1flip T1FLIP [T1FLIP...]
+                        list of flip angle(s) of T1 data (type:
+                        Float64)
+  -m, --models MODELS [MODELS...]
+                        list of models: 1=plasma only, 2=Standard,
+                        3=Extended (type: Int64)
   -p, --plotting        plot intermediate results
   -w, --workers WORKERS
                         number of parallel workers to use (one per CPU
-                        core is best) (type: Int64, default: 4)
+                        core is good) (type: Int64, default: 4)
   -v, --verbose         show verbose output
   -h, --help            show this help message and exit
+
 ```
 
 To process a DCEMRI data set from the command line, the minimum invocation is
 `dcefit /path/to/my/dce/data.mat`.
 
 The input data MAT file must contain the following:
-- `aif`: Arterial input function (Cp) as a vector, resampled to the DCE time points.
-- `dcedata`: DCE data as a 3-D array (1 time by 2 space dimensions).
+- `Cp`: Arterial input function as a vector, resampled to the DCE time points.
+- `DCEdata`: DCE data as a 3-D array (1 time by 2 space dimensions).
+- `DCEflip` : flip angle in deg of DCE data
 - `t`: time vector representing the dcedata samples.
-- R1 information as either `R1map` and `S0map`, representing pre-calculated R1 relaxation maps, or as `t1data`, indicating that
-a multi-flip scan was performed and must be analyzed.  If `t1data` is supplied, the code also needs `t1flip`, a vector of flip angles (in degrees) for the multi-flip data.
+- `TR`: repetition time of DCE scan
+- R1 information as either `R10` and `S0`, representing pre-calculated R1 relaxation maps, or as `T1data`, indicating that
+a multi-flip scan was performed and must be analyzed.  If `T1data` is supplied, the code also needs `T1flip`, a vector of flip angles (in degrees) for the multi-flip data.
 
 The results will be saved in the current directory as `results.mat`.  You can override the output file name and location with the `--outfile` flag.
 
@@ -114,34 +121,68 @@ The results will be saved in the current directory as `results.mat`.  You can ov
 
 ## Validating the Installation
 
-After installing the Julia and the __DCEMRI__ module, you should run the validations, to make sure the calculations work correctly on your machine.  The easiest way to do this is to run `tests/validateall.jl` with a command such as
+After installing the Julia and the __DCEMRI__ module, you should run the validations, to make sure the calculations work correctly on your machine.  The easiest way to do this is to start Julia and then run
 ```
-julia -p 4 validateall.jl
+using DCEMRI
+validate()
 ```
-The `-p 4` flag starts four worker processes.  If that runs, successfully, it will deposit a number of plots into `tests/q4/results` and `tests/q6/results`.  Examine these plots to make sure that the parameters have been recovered accurately.  You can also check the text output of the scripts to see quantitative measures of parameter accuracy.  An example output is shown here:
+This will run both validations (4 and 6), which could take up to an hour, depending on the number of cores you started Julia with. Examine the results to make sure that the parameters have been recovered accurately.  You can also check the text output of the scripts to see quantitative measures of parameter accuracy.  An example output is shown here:
 
 ```
-$ julia -p 4 validate6.jl
-Running analysis of QIBA v6 (noisefree) data ...
-reading input data
-found existing R1 map
+julia> validate(4)
+Running analysis of noise-free QIBA v4 data ...
+running models
+found multi-flip data
+fitting R1 relaxation rate to multi-flip data
+fitting 6 x 23 points on each of 4 workers
+processed 90 voxels in 2.2 s (41.5 vox/s)
+
 computing signal enhancement ratios
 converting DCE signal to effective R1
 converting effective R1 to tracer tissue concentration Ct
 fitting DCE data
-attempting Standard Tofts-Kety model
-fitting 1321 x 8 points on each of 4 workers
-processed 30 voxels in 5.6 s (5.3 vox/s)
+attempting Extended Tofts-Kety model
+fitting 661 x 23 points on each of 4 workers
+processed 90 voxels in 3.8 s (23.5 vox/s)
 
-saving results to results/results.mat
+saving results to /Users/dss/.julia/v0.3/DCEMRI/test/q4/results/results.mat
 Plotting results ...
-Kt RMSE (%): 0.4190757071962333
-Kt max error: 2.1663846245047376
-Kt CCC: 0.9999304818092664
-ve RMSE (%): 0.1261810893311759
-ve max error: 0.5704916764566864
-ve CCC: 0.9999993740149458
+Kt RMSE (%): 6.97465437361441
+Kt max error (%): 23.493640353851994
+Kt CCC: 0.9998009845162595
+ve RMSE (%): 18.02170557638968
+ve max error (%): 99.99999999999996
+ve CCC: 0.8904290685710147
+vp RMSE (%): 23.770196145538407
+vp max error (%): 92.10583127104924
+vp CCC: 0.9999200988268792
+Running analysis of noisy QIBA v4 data ...
+running models
+found multi-flip data
+fitting R1 relaxation rate to multi-flip data
+fitting 6 x 2250 points on each of 4 workers
+processed 9000 voxels in 0.5 s (19436.3 vox/s)
 
+computing signal enhancement ratios
+converting DCE signal to effective R1
+converting effective R1 to tracer tissue concentration Ct
+fitting DCE data
+attempting Extended Tofts-Kety model
+fitting 661 x 2250 points on each of 4 workers
+processed 9000 voxels in 341.7 s (26.3 vox/s)
+
+saving results to /Users/dss/.julia/v0.3/DCEMRI/test/q4/results_noisy/results.mat
+Plotting results ...
+Kt RMSE (%): 11.311615941962662
+Kt max error (%): 100.0
+Kt CCC: 0.9742179876687028
+ve RMSE (%): 18.238054961776477
+ve max error (%): 100.0
+ve CCC: 0.7026132423939505
+vp RMSE (%): 12.654024477709797
+vp max error (%): 100.0
+vp CCC: 0.9717255972607232
+Validation complete. Results can be found in /Users/dss/.julia/v0.3/DCEMRI/test/q4.
 ```
 
 To perform the validation on the Quantitative Imaging Biomarkers Alliance phantoms for yourself from the original DICOMS, you will need to download the DICOMS from [Daniel Barboriak's Lab](https://dblab.duhs.duke.edu/modules/QIBAcontent/index.php?id=1).  Then the scripts in the `q4` and `q6` folders will help you translate the DICOM data to MAT files suitable for input into the Julia code.
@@ -150,33 +191,30 @@ I have already done this step for you and included the MAT files.  This also avo
 
 ## Running the In Vivo Demo
 
-If you are not already in the __DCEMRI.jl__ source directory, you can navigate there from within
-the Julia environment by pressing `;` to obtain the `shell>` prompt and then navigating there
-with shell commands.  After each shell command, you will need to press `;` again to drop back into the `shell>` prompt.  The semicolon acts as
-a shell command prefix.  The fancy prompt change acts as a reminder that the next text you enter will be interpreted by the shell.
-
-Once you are in the DCEMRI.jl directory, you can run the in vivo data demo with the command
-`include("rundemo.jl")`.  After a few seconds to a few minutes, depending on the speed of your machine, you will see the following output text:
+You can run the in vivo data demo with the command
+`demo()`.  After a few seconds to a few minutes, depending on the speed of your machine, you will see the following output text:
 
 ```
-julia> include("rundemo.jl")
+julia> demo()
 Processing in vivo data ...
-reading input data
+running models
 found multi-flip data
 fitting R1 relaxation rate to multi-flip data
 fitting 10 x 4582 points on each of 4 workers
-processed 18326 voxels in 0.9 s (20983.0 vox/s)
+processed 18327 voxels in 1.0 s (19055.6 vox/s)
 
 computing signal enhancement ratios
 converting DCE signal to effective R1
 converting effective R1 to tracer tissue concentration Ct
-fitting Standard Tofts-Kety model to tissue concentration Ct
+fitting DCE data
+attempting Standard Tofts-Kety model
 fitting 25 x 1694 points on each of 4 workers
-processed 6774 voxels in 0.9 s (7640.2 vox/s)
+processed 6774 voxels in 1.1 s (5928.8 vox/s)
 
 saving results to results/results.mat
 Plotting results ...
-elapsed time: 6.123248086 seconds (951780100 bytes allocated, 11.64% gc time)
+Demo run complete.
+Results can be found in /Users/dss/.julia/v0.3/DCEMRI/demo/results
 ```
 
 ## Concluding Remarks

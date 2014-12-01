@@ -21,17 +21,17 @@ To install __DCEMRI.jl__, run
 ```
 julia> Pkg.clone("http://github.com/davidssmith/DCEMRI.jl")
 ```
-at the `julia>` prompt.
+at the `julia>` prompt.  This might take a minute, because the validation data must be downloaded, as well as a few supporting packages. If you get an error than `xcrun` is missing on Mac OS X, follow the instructions to installed the Developer Tools Command Line Tools, and then try again. 
 
 (Optional) Finally, if you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
-Most machines probably already have a version of Python installed.  It is a ubiquitous scripting language.  To install Matplotlib on top of it, you can run `easy_install matplotlib`.  If that doesn't work, you can try `pip install matplotlib`.
-If neither works, see the Matplotlib [install FAQ](http://matplotlib.org/faq/installing_faq.html).  If you don't have Python at all for some reason, you can grab the excellent [Anaconda distribution](https://store.continuum.io/cshop/anaconda/), which comes with Matplotlib pre-installed.
+Most machines probably already have a version of Python with Matplotlib installed.
+If you don't have Python with Matplotlib, you can grab the excellent [Anaconda distribution](https://store.continuum.io/cshop/anaconda/), which comes with Matplotlib pre-installed.
 
 Now you're ready to roll!
 
 ## A Note about Units
 
-All units in the code are SI where possible.  Sometimes, due to numerical accuracy issues, they have been converted internally. But all data should be supplied to the code in SI units.  In particular, time should be in seconds, and relaxation rates in inverse seconds.  Flip angles should be in degrees. The one exception to this in the output is that in the Tofts-Kety models Ktrans is in min^-1.
+All units in the code are SI where possible.  Sometimes, due to numerical accuracy issues, they have been converted internally. But all data should be supplied to the code in SI units.  In particular, time should be in seconds, and relaxation rates in inverse seconds.  The two exceptions to this rule are that flip angles should be in degrees and Ktrans is output in min^-1.
 
 ## Running the Code
 
@@ -39,10 +39,11 @@ All units in the code are SI where possible.  Sometimes, due to numerical accura
 
 In the simplest incarnation, if you already have a MAT file containing your data,  you can run the analysis from within Julia using
 ```
-using DCEMRI
-results = runmodel(datafile="/path/to/your/datafile.mat")
+julia> using DCEMRI
+
+julia> results = fitdata(datafile="/path/to/your/datafile.mat")
 ```
-__DCEMRI.jl__ will look for parameters in the input MAT file, and if they are found will use them.  Anything not found in the MAT file will be initialized from the defaults.  These defaults can be viewed with the `defaultparams()` command.  You may also override both the MAT file and the defaults by passing keyword arguments to `runmodel`.
+__DCEMRI.jl__ will look for parameters in the input MAT file, and if they are found will use them.  Anything not found in the MAT file will be initialized from the defaults.  These defaults can be viewed with the `defaultparams()` command.  You may also override both the MAT file and the defaults by passing keyword arguments to `fitdata`.
 
 ### As a shell command
 
@@ -122,8 +123,9 @@ The results will be saved in the current directory as `results.mat`.  You can ov
 
 After installing the Julia and the __DCEMRI__ module, you should run the validations, to make sure the calculations work correctly on your machine.  The easiest way to do this is to start Julia and then run
 ```
-using DCEMRI
-validate()
+julia> using DCEMRI
+
+julia> validate()
 ```
 This will run both validations (4 and 6), which could take up to an hour, depending on the number of cores you started Julia with. Examine the results to make sure that the parameters have been recovered accurately.  You can also check the text output of the scripts to see quantitative measures of parameter accuracy.  An example output is shown here:
 

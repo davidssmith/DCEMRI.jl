@@ -1,4 +1,4 @@
-using PyPlot
+using PyPlot 
 
 function jetrgb(x::Float64)
   y = 4x

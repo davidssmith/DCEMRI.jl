@@ -42,7 +42,7 @@ function parsefromargs()
     help = "plot intermediate results"
     action = :store_true
     "--workers", "-w"
-    help = "number of parallel workers to use (one per CPU core is best)"
+    help = "number of parallel workers to use (one per CPU core is good)"
     arg_type = Int64
     default = 4
     "--verbose", "-v"
@@ -66,14 +66,13 @@ function defaultdict()
   opts["TR"] = nothing
   opts["relaxivity"] = nothing
   opts["dceflip"] = nothing
-  opts["modelflags"] = 7
+  opts["models"] = [2]
   opts["plotting"] = false
   opts["outfile"] = "output.mat"
   opts["verbose"] = true
   opts["t1flip"] = []
   opts["workers"] = 4
   opts["datafile"] = "input.mat"
-  opts["model"] = "standard"
   opts
 end
 
@@ -84,10 +83,8 @@ function validate(matdict)
   @assert haskey(matdict, "t") "Input MAT file must contain 't' vector of time points."
 end
 
-function ccc(x, y)
+function ccc{T,N}(x::Array{T,N}, y::Array{T,N})
   # concordance correlation coefficient
-  x = x[:]
-  y = y[:]
   m1 = mean(x)
   m2 = mean(y)
   s1 = var(x)*(length(x) - 1.0) / length(x)
@@ -102,5 +99,5 @@ function kwargs2dict(kwargs)
     for (k, v) in kwargs
         d[string(k)] = v
     end
-    return d
+    d
 end

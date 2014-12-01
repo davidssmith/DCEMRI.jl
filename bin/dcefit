@@ -9,7 +9,7 @@
 
 using DCEMRI
 
-params = length(ARGS) > 0 ? parsefromargs() : defaultdict()
+params = length(ARGS) > 0 ? DCEMRI.parsefromargs() : defaultdict()
 
 # set up parallel workers, fit routines will use as many as are available
 println("starting workers")

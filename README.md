@@ -23,7 +23,7 @@ julia> Pkg.clone("http://github.com/davidssmith/DCEMRI.jl")
 ```
 at the `julia>` prompt.
 
-(Optional) Finalyl, if you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
+(Optional) Finally, if you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
 Most machines probably already have a version of Python installed.  It is a ubiquitous scripting language.  To install Matplotlib on top of it, you can run `easy_install matplotlib`.  If that doesn't work, you can try `pip install matplotlib`.
 If neither works, see the Matplotlib [install FAQ](http://matplotlib.org/faq/installing_faq.html).  If you don't have Python at all for some reason, you can grab the excellent [Anaconda distribution](https://store.continuum.io/cshop/anaconda/), which comes with Matplotlib pre-installed.
 

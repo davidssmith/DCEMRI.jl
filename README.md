@@ -1,7 +1,7 @@
 DCEMRI.jl
 =========
 
-A Fast, Validated Toolkit for Dynamic Contrast Enhanced MRI Analysis
+A Fast, Validated Open Source Toolkit for Dynamic Contrast Enhanced MRI Analysis
 
 ## Why Julia?
 
@@ -43,6 +43,15 @@ Now you're ready to run it!
 All units in the code are SI where possible.  Sometimes, due to numerical accuracy issues, they have been converted internally. But all data should be supplied to the code in SI units.  In particular, time should be in seconds, and relaxation rates in inverse seconds.  Flip angles should be in degrees. The one exception to this in the output is that in the Tofts-Kety models Ktrans is in min^-1.
 
 ## Running the Code
+
+### As a Julia module
+
+In the simplest incarnation, if you already have a MAT file containing your data,  you can run the analysis from within Julia using
+```
+using DCEMRI
+results = runmodel(datafile="/path/to/your/datafile.mat")
+```
+__DCEMRI.jl__ will look for parameters in the input MAT file, and if they are found will use them.  Anything not found in the MAT file will be initialized from the defaults.  These defaults can be viewed with the `defaultparams()` command.  You may also override both the MAT file and the defaults by passing keyword arguments to `runmodel`.
 
 ### As a shell command
 
@@ -114,7 +123,6 @@ a multi-flip scan was performed and must be analyzed.  If `T1data` is supplied, 
 
 The results will be saved in the current directory as `results.mat`.  You can override the output file name and location with the `--outfile` flag.
 
-### As a Julia module
 
 
 

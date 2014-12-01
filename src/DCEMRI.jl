@@ -5,7 +5,7 @@ using Calculus    #.jacobian
 using MAT
 
 export ser, r1eff, tissueconc, fitr1, fitdce, runmodel,
-  defaultdict, ccc, nlsfit, demo, makeplots, validate
+  defaultparams, ccc, nlsfit, demo, makeplots, validate
 
 const verbose = true
 const version = "v0.3"

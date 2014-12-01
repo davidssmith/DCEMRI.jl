@@ -13,30 +13,21 @@ Put simply, it looks like Matlab, which is simple to learn and familiar to most 
 
 ## Installation
 
-### Julia
+1. To get running, you need two things for sure: Julia and __DCEMRI.jl__.
+The simplest way to get Julia is to download the current release version from [julialang.org](http://julialang.org/downloads/).
 
-I've tried to keep the software dependencies to a minimum.  So to run this
-code you must install only the Julia programming language. Julia can be
-downloaded from [julialang.org](http://julialang.org/downloads/) as
-pre-compiled binaries or cloned from the [github
-repository](https://github.com/JuliaLang/julia).  See the [Julia
-readme](https://github.com/JuliaLang/julia/blob/master/README.md) for
-compilation instructions. In particular, you must have a [number of
-development
-tools](https://github.com/JuliaLang/julia#required-build-tools-and-external-libraries)
-installed.
-
-Once you have the base Julia install working, go ahead and start it up.  You might need to set your PATH shell variable to point to your install location, or you may just be able to double-click the icon if you installed one of the pre-compiled binaries.
-
-### DCEMRI.jl
-
-Next, you'll need to install __DCEMRI.jl__ by entering the following at the Julia prompt:
+2. Once Julia is installed, open it. You should see a terminal window with the `julia>` prompt.  This is analogous to the command line in Matlab.
+To install __DCEMRI.jl__, run
 ```
 julia> Pkg.clone("http://github.com/davidssmith/DCEMRI.jl")
 ```
-This should grab the latest version of __DCEMRI.jl__ and all of the required dependencies.
+at the `julia>` prompt.
 
-Now you're ready to run it!
+3. (Optional) If you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
+To install Matplotlib on most machines, you can run `easy_install matplotlib`.  If that doesn't work, you can try `pip install matplotlib`.
+If neither works, see the Matplotlib [install FAQ](http://matplotlib.org/faq/installing_faq.html).
+
+Now you're ready to roll!
 
 ## A Note about Units
 
@@ -228,6 +219,8 @@ Results can be found in /Users/dss/.julia/v0.3/DCEMRI/demo/results
 ## Concluding Remarks
 
 If you've made it this far, you are ready to run the DCE analysis on your own data.  Congratulations!  If you have problems or find bugs, please file an issue on the [github repository](http://github.com/davidssmith/DCEMRI.jl) or email us.  If you find ways to make it better, please submit your improvements as well. We hope that this can become a community effort that leads to an outstanding, rock solid, trustworthy tool.
+
+To keep your installation of __DCEMRI.jl__ up to date, periodically run `Pkg.update()` at the `julia>` prompt.
 
 ## Funding Sources
 

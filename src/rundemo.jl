@@ -3,16 +3,8 @@ function rundemo(outdir::String="results")
   isdir(outdir) || mkdir(outdir)
   println("Processing in vivo data ...")
 
-  # initialize the model parameters with the defaults
-  opts = defaultdict()
-
-  # then modify as necessary to fit your data
-  opts["datafile"] = "invivo.mat"
-  opts["outfile"] = "$outdir/results.mat"
-  opts["modelflags"] = 2
-
   # run the model
-  results = runmodel(opts)
+  results = runmodel(datafile="invivo.mat", outfile="$outdir/results.mat", models=[2])
 
   # plot the results
   println("Plotting results ...")

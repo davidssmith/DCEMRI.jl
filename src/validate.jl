@@ -263,67 +263,35 @@ function makeplots4(mat::Dict, outdir::String; dx::Int64=1)
   savefig("$outdir/vp_error.pdf")
 end
 
-
-function validate4(outdir::String)
-  cd(Pkg.dir("DCEMRI/tests/q4"))
-  println("Running analysis of QIBA v4 extended Tofts data ...")
-  opts = defaultdict()
-  opts["datafile"] = "qiba4.mat"
-  isdir("$outdir/results") || mkdir("$outdir/results")
-  opts["outfile"] = "$outdir/results/results.mat"
-  opts["modelflags"] = 4
-  delete!(opts, "mask")
-  results = runmodel(opts)
-
-  println("Plotting results ...")
-  makeplots4(results, "$outdir/results", dx=10)
-
-  println("Running analysis of noisy QIBA v4 extended Tofts data ...")
-  opts = defaultdict()
-  opts["datafile"] = "qiba4noisy.mat"
-  isdir("$outdir/results_noisy") || mkdir("$outdir/results_noisy")
-  opts["outfile"] = "$outdir/results_noisy/results.mat"
-  opts["modelflags"] = 4
-  delete!(opts, "mask")
-  results = runmodel(opts)
-
-  println("Plotting results ...")
-  makeplots4(results, "$outdir/results_noisy")
-  println("Validation complete. Results can be found in $outdir.")
+function makeplots(n::Int64, mat::Dict, outdir::String; dx::Int64=1)
+  if n == 4
+    makeplots4(mat, outdir, dx)
+  else if n == 6
+    makeplots6(mat, outdir, dx)
+  end
 end
-validate4() = validate4(Pkg.dir("DCEMRI/tests/q4"))
 
 
-function validate6(outdir::String)
-  cd(Pkg.dir("DCEMRI/tests/q6"))
-  println("Running analysis of QIBA v6 standard Tofts data ...")
-  opts = defaultdict()
-  opts["datafile"] = "qiba6.mat"
+function validate(n::Int64, outdir::String)
+  @assert n == 4 || n == 6 "n must be 4 on 6"
+  cd(Pkg.dir("DCEMRI/tests/q$n"))
+
+  println("Running analysis of noise-free QIBA v$n data ...")
   isdir("$outdir/results") || mkdir("$outdir/results")
-  opts["outfile"] = "$outdir/results/results.mat"
-  opts["modelflags"] = 2
-  delete!(opts, "mask")
-  results = runmodel(opts)
-
+  results = runmodel(datafile="qiba$n.mat",outfile="$outdir/results/results.mat",
+                     models=[2])
   println("Plotting results ...")
   makeplots6(results, "$outdir/results", dx=10)
 
-  println("Running analysis of noisy QIBA v6 standard Tofts data ...")
-  opts = defaultdict()
-  opts["datafile"] = "qiba6noisy.mat"
+  println("Running analysis of noisy QIBA v$n data ...")
   isdir("$outdir/results_noisy") || mkdir("$outdir/results_noisy")
-  opts["outfile"] = "$outdir/results_noisy/results.mat"
-  opts["modelflags"] = 2
-  delete!(opts, "mask")
-  results = runmodel(opts)
+  results = runmodel(datafile="qiba$(n)noisy.mat",
+                     outfile="$outdir/results_noisy/results.mat",
+                     models=[2])
 
   println("Plotting results ...")
   makeplots6(results, "$outdir/results_noisy")
   println("Validation complete. Results can be found in $outdir.")
 end
-validate6() = validate6(Pkg.dir("DCEMRI/tests/q6"))
-
-function validate()
-  validate6()
-  validate4()
-end
+validate(n::Int64) = validate(n, Pkg.dir("DCEMRI/tests/q$n"))
+validate() = validate(6) && validate(4)

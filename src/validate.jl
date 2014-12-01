@@ -292,6 +292,7 @@ function validate4(outdir::String)
 end
 validate4() = validate4(Pkg.dir("DCEMRI/tests/q4"))
 
+
 function validate6(outdir::String)
   cd(Pkg.dir("DCEMRI/tests/q6"))
   println("Running analysis of QIBA v6 standard Tofts data ...")

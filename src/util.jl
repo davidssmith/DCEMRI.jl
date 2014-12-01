@@ -77,6 +77,14 @@ function defaults()
   opts
 end
 
+function startworkers(n)
+  if nworkers() < n
+     println("adding $(n-nworkers()) more workers")
+     addprocs(n - nworkers())
+     @everywhere using DCEMRI
+  end
+end
+
 function validate(d::Dict)
   for k in ["Cp", "DCEdata", "DCEflip", "TR", "t"]
     @assert haskey(d, k) "Input must contain $k"

@@ -65,7 +65,7 @@ end
 
 
 function fitdce{N}(Ct::Array{Float64,N}, mask::BitMatrix, t::Vector{Float64},
-                   Cp::Vector{Float64}; modelflags::Int=7, verbose::Bool=false,
+                   Cp::Vector{Float64}; models::Vector{Int64}=[2], verbose::Bool=false,
                    residthresh::Float64=1.0, ktcutoff::Float64=5.0)
   @dprint "fitting DCE data"
   sizein = size(Ct)
@@ -76,13 +76,13 @@ function fitdce{N}(Ct::Array{Float64,N}, mask::BitMatrix, t::Vector{Float64},
   idxs = find(mask)
 
   nidxs = length(idxs)
-  nmodels = sum(int(split(bits(modelflags),"")))
-  @assert nmodels > 0 "at least one model must be specified in modelflags"
+  nmodels = length(models)
+  @assert nmodels > 0 "at least one model must be specified"
   resid = Inf*ones(n)
   params = zeros(3, n)
   modelmap = zeros(Uint8, n)
 
-  if modelflags & 4 != 0
+  if 3 in models
     @dprint "attempting Extended Tofts-Kety model"
     p0 = [0.01, 0.01, 0.01]
     f3(x,p) = extendedtoftskety(x, p, Cp)
@@ -92,7 +92,7 @@ function fitdce{N}(Ct::Array{Float64,N}, mask::BitMatrix, t::Vector{Float64},
     params[:] = p
     modelmap[idxs] = 3
   end
-  if modelflags & 2 != 0
+  if 2 in models
     @dprint "attempting Standard Tofts-Kety model"
     p0 = [0.01, 0.01]
     f2(x,p) = toftskety(x, p, Cp)
@@ -108,7 +108,7 @@ function fitdce{N}(Ct::Array{Float64,N}, mask::BitMatrix, t::Vector{Float64},
       end
     end
   end
-  if modelflags & 1 != 0
+  if 1 in models
     @dprint "attempting plasma-only model"
     p0 = [0.01]
     f1(x,p) = onecompartment(x, p, Cp)
@@ -147,7 +147,7 @@ function runmodel(opts::Dict)
   validate(mat)
   const relaxivity = opts["relaxivity"] == nothing ? mat["R"] : opts["relaxivity"]
   const TR = opts["TR"] == nothing ? mat["TR"] : opts["TR"]
-  const modelflags = haskey(mat, "modelflags") ? int(mat["modelflags"]) : opts["modelflags"]
+  const models = haskey(mat, "models") ? int(mat["models"]) : opts["models"]
   const outfile = haskey(mat, "outfile") ? mat["outfile"] : opts["outfile"]
   aifdata = mat["aif"][:]  # colon makes sure that we get an Array{T,1}
 
@@ -181,7 +181,7 @@ function runmodel(opts::Dict)
   R1eff = r1eff(dcedata, S0, R1map, TR, dceflip)
   Ct = tissueconc(R1eff, R1map, relaxivity)
   mask = haskey(mat, "mask") ? convert(BitArray{2}, mat["mask"]) : SER .> 2.0
-  params, resid, modelmap = fitdce(Ct, mask, t, aifdata, modelflags=modelflags,
+  params, resid, modelmap = fitdce(Ct, mask, t, aifdata, models=models,
                                    verbose=opts["verbose"])
 
   @dprint "saving results to $outfile"
@@ -192,7 +192,7 @@ function runmodel(opts::Dict)
   results["S0"] = S0map
   results["SER"] = SER
   results["mask"] = convert(Array{Bool,2}, mask)
-  results["modelflags"] = modelflags
+  results["models"] = models
   results["modelmap"] = modelmap
   results["R1eff"] = R1eff
   results["Ct"] = Ct

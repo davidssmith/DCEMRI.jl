@@ -30,13 +30,14 @@ function parsefromargs()
     help = "flip angle of DCE data"
     arg_type = Float64
     "--t1flip", "-t"
-    help = "flip angle(s) of T1 data"
+    help = "list of flip angle(s) of T1 data"
     arg_type = Float64
     nargs = '+'
     "--modelflags", "-m"
-    help = "logical OR of models to try (1=plasma only, 2=Standard, 3=Extended)"
+    help = "list of models: 1=plasma only, 2=Standard, 3=Extended"
     arg_type = Int64
-    default = 7
+    default = 2
+    nargs = '+'
     "--plotting", "-p"
     help = "plot intermediate results"
     action = :store_true

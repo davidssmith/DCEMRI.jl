@@ -1,66 +1,66 @@
-function ser{N}(images::Array{Float64,N}, thresh::Float64=0.01)
+function ser{N}(x::Array{Float64,N}, thresh::Float64=0.01)
   @dprint "computing signal enhancement ratios"
   @assert thresh > 0.0
-  dims = size(images)
+  dims = size(x)
   nt = dims[1]
   n = prod(dims[2:end])
   SER = zeros(n)
-  images = reshape(images, (nt, n))
-  thresh *= maximum(images[:])
+  x = reshape(x, (nt, n))
+  thresh *= maximum(x[:])
   for k in 1:n
-    SER[k] = sum(images[1:3,k]) > thresh ? sum(images[end-3:end,k]) / sum(images[1:3,k]) : 0.0
+    SER[k] = sum(x[1:3,k]) > thresh ? sum(x[end-3:end,k]) / sum(x[1:3,k]) : 0.0
   end
   reshape(SER, dims[2:end])
 end
 
-function r1eff(S::Array{Float64,3}, S0::Matrix{Float64}, R1::Matrix{Float64},
+function r1eff(S::Array{Float64,3}, S0::Matrix{Float64}, R10::Matrix{Float64},
                TR::Float64, flip::Float64)
   @dprint "converting DCE signal to effective R1"
   @assert 0.0 < flip "flip angle must be positive"
   @assert 0.0 < TR && TR < 1.0 "TR must be in units of ms"
   nt, nx, ny = size(S)
   A = copy(S)
-  R1eff = similar(S)
+  R1 = similar(S)
   for x in 1:nx, y in 1:ny
-    E0 = exp(-R1[x,y] * TR)
+    E0 = exp(-R10[x,y] * TR)
     A[:,x,y] = A[:,x,y] / S0[x,y] # normalize by pre-contrast signal
     for t in 1:nt
       E = (1.0 - A[t,x,y] + A[t,x,y]*E0 - E0*cos(flip)) /
         (1.0 - A[t,x,y]*cos(flip) + A[t,x,y]*E0.*cos(flip) - E0*cos(flip))
-      R1eff[t,x,y] = E > 0.0 ? (-1.0 / TR) * log(E) : 0.0
+      R1[t,x,y] = E > 0.0 ? (-1.0 / TR) * log(E) : 0.0
     end
   end
-  R1eff
+  R1
 end
 
-function tissueconc{M,N}(R1eff::Array{Float64,M}, R1map::Array{Float64,N}, relaxivity::Float64)
+function tissueconc{M,N}(R1::Array{Float64,M}, R10::Array{Float64,N}, r1::Float64)
   @dprint "converting effective R1 to tracer tissue concentration Ct"
-  @assert relaxivity > 0.0
-  Ct = similar(R1eff)
-  nt = size(R1eff,1)
-  xidxs = find(R1map)
+  @assert r1 > 0.0
+  Ct = similar(R1)
+  nt = size(R1,1)
+  xidxs = find(R10)
   for x in xidxs, t in 1:nt
-    Ct[t,x] = R1eff[t,x] > 0.0 ? (R1eff[t,x] - R1map[x]) / relaxivity : 0.0
+    Ct[t,x] = R1[t,x] > 0.0 ? (R1[t,x] - R10[x]) / r1 : 0.0
   end
   Ct
 end
 
 
-function fitr1(images, flip_angles::Vector{Float64}, TR::Float64,
+function fitr1(x, flip_angles::Vector{Float64}, TR::Float64,
                resid_thresh::Float64=0.01)
   @dprint "fitting R1 relaxation rate to multi-flip data"
-  sizein = size(images)
+  sizein = size(x)
   n = prod(sizein[2:end])
   nangles = sizein[1]
   @assert nangles == length(flip_angles)
-  images = reshape(images, (nangles, n))
-  p0 = [maximum(images), 1.0]
+  x = reshape(x, (nangles, n))
+  p0 = [maximum(x), 1.0]
   model(x,p) = spgreqn(x, p, TR)
-  idxs = find(mean(images, 1) .> 0.1*maximum(images))
-  params, resid = nlsfit(model, images, idxs, flip_angles, p0)
-  S0map = reshape(params[1,:], sizein[2:end])
-  R1map = reshape(params[2,:], sizein[2:end])
-  (R1map, S0map, resid)
+  idxs = find(mean(x, 1) .> 0.1*maximum(x))
+  params, resid = nlsfit(model, x, idxs, flip_angles, p0)
+  S0 = reshape(params[1,:], sizein[2:end])
+  R10 = reshape(params[2,:], sizein[2:end])
+  (R10, S0, resid)
 end
 
 
@@ -139,62 +139,67 @@ function fitdce{N}(Ct::Array{Float64,N}, mask::BitMatrix, t::Vector{Float64},
 end
 
 
+
 function runmodel(opts::Dict)
-  @dprint "reading input data"
+  @dprint "running models"
+  validate(opts)
+  opts = merge(defaultparams(), opts)
 
   # load DCE and R1 data
-  mat = matread(opts["datafile"])
-  validate(mat)
-  const relaxivity = opts["relaxivity"] == nothing ? mat["R"] : opts["relaxivity"]
-  const TR = opts["TR"] == nothing ? mat["TR"] : opts["TR"]
-  const models = haskey(mat, "models") ? int(mat["models"]) : opts["models"]
-  const outfile = haskey(mat, "outfile") ? mat["outfile"] : opts["outfile"]
-  aifdata = mat["aif"][:]  # colon makes sure that we get an Array{T,1}
+  relaxivity = opts["relaxivity"]
+  TR = opts["TR"]
+  models = opts["models"]
+  outfile = opts["outfile"]
+  Cp = vec(opts["Cp"])  # colon makes sure that we get a vector
 
   # parallel workers are better than multithreaded BLAS for this problem
   # run julia with the '-p <n>' flag to start with n workers
   blas_set_num_threads(1)
 
-  if haskey(mat, "R1map") && haskey(mat, "S0map")
+  if haskey(opts, "R10") && haskey(opts, "S0")
     @dprint "found existing R1 map"
-    R1map = mat["R1map"]
-    S0map = mat["S0map"]
+    R10 = opts["R10"]
+    S0 = opts["S0"]
   else
     @dprint "found multi-flip data"
-    t1data = mat["t1data"]
-    t1flip = (isempty(opts["t1flip"]) ? mat["t1flip"][:] : opts["t1flip"]) * pi / 180.0
+    t1data = opts["T1data"]
+    t1flip = opts["t1flip"] * pi / 180.0
     @assert length(t1flip) == size(t1data,1) # must have one flip angle per T1 image
-    R1map, S0map = fitr1(t1data, t1flip, TR)
+    R10, S0 = fitr1(t1data, t1flip, TR)
   end
 
-  dcedata = mat["dcedata"]
-  t = mat["t"][:] / 60.0  # convert time to min
-  dceflip = (opts["dceflip"] == nothing ? mat["dceflip"] : opts["dceflip"]) * pi / 180.0
+  dcedata = opts["DCEdata"]
+  t = vec(opts["t"]) / 60.0  # convert time to min
+  dceflip = opts["DCEflip"] * pi / 180.0
 
   nt, nx, ny = size(dcedata)
-  @assert nx == size(R1map,1) "R1 map and DCE images have different numbers of rows"
-  @assert ny == size(R1map,2) "R1 map and DCE images have different numbers of columns"
+  @assert nx == size(R10,1) "R10 map and DCE images have different numbers of rows"
+  @assert ny == size(R10,2) "R10 map and DCE images have different numbers of columns"
 
   # MAIN: run postprocessing steps
   SER = ser(dcedata)
   S0 = squeeze(mean(dcedata[1:2,:,:],1),1)
-  R1eff = r1eff(dcedata, S0, R1map, TR, dceflip)
-  Ct = tissueconc(R1eff, R1map, relaxivity)
-  mask = haskey(mat, "mask") ? convert(BitArray{2}, mat["mask"]) : SER .> 2.0
-  params, resid, modelmap = fitdce(Ct, mask, t, aifdata, models=models,
+  R1 = r1eff(dcedata, S0, R10, TR, dceflip)
+  Ct = tissueconc(R1, R10, relaxivity)
+  if haskey(opts, "mask")
+      mask = convert(BitArray{2}, opts["mask"])
+  else
+      mask = SER .> opts["SERcutoff"]
+  end
+  params, resid, modelmap = fitdce(Ct, mask, t, Cp, models=models,
                                    verbose=opts["verbose"])
 
   @dprint "saving results to $outfile"
   results = Dict()
   results["t"] = t
-  results["aif"] = aifdata
-  results["R1"] = R1map
-  results["S0"] = S0map
+  results["Cp"] = Cp
+  results["R10"] = R10
+  results["S0"] = S0
   results["SER"] = SER
   results["mask"] = convert(Array{Bool,2}, mask)
   results["models"] = models
   results["modelmap"] = modelmap
-  results["R1eff"] = R1eff
+  results["R1"] = R1
   results["Ct"] = Ct
   results["Kt"] = squeeze(params[1,:,:], 1)
   results["ve"] = squeeze(params[2,:,:], 1)
@@ -204,5 +209,5 @@ function runmodel(opts::Dict)
 
   results
 end
-
-runmodel( ;kwargs...) = runmodel(kwargs2dict(kwargs))
+runmodel(infile::String) = runmodel(matread(infile)) # point to MAT file
+runmodel(; kwargs...) = runmodel(kwargs2dict(kwargs)) # keyword args

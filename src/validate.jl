@@ -266,7 +266,7 @@ end
 function makeplots(n::Int64, mat::Dict, outdir::String; dx::Int64=1)
   if n == 4
     makeplots4(mat, outdir, dx)
-  else if n == 6
+  elseif n == 6
     makeplots6(mat, outdir, dx)
   end
 end

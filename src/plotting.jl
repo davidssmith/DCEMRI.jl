@@ -1,4 +1,4 @@
-using PyPlot 
+using PyPlot
 
 function jetrgb(x::Float64)
   y = 4x
@@ -36,7 +36,6 @@ function cubehelix(x::Float64; start=0.3, rot=-0.5, gamma=1.0,
   [red, grn, blu]
 end
 
-
 function overlay(front::Array{Float64,2}, back::Array{Float64,2}, mask::Array{Bool,2})
   @assert(length(front) == length(back))
   z = similar(front)
@@ -48,25 +47,7 @@ function overlay(front::Array{Float64,2}, back::Array{Float64,2}, mask::Array{Bo
   z
 end
 
-function colorize(x::Array{Float64,2})
-  minx = minimum(x)
-  rangex = maximum(x) - minimum(x)
-  x = (x - minx) / rangex
-  n,m = size(x)
-  img = zeros(n,m,3)
-  for k in 1:n, j in 1:n
-    col = jetrgb(x[j,k])
-    img[j,k,1] = col.r
-    img[j,k,2] = col.g
-    img[j,k,3] = col.b
-  end
-  img #* rangex + minx
-end
-
 function oplot2(front::Array{Float64,2}, back::Array{Float64,2}, mask::Array{Bool,2})
-  #c = colormap("Blues")
-  #c = sequential_palette(240, c=0.9, s=0.8, b=0.75, w=0.25, d=0.2, wcolor=RGB(1,1,0), dcolor=RGB(0,0,1))
-  #b = colormap("Grays")
   @assert length(front) == length(back)
   # normalize the images
   r = maximum(back) - minimum(back)
@@ -77,7 +58,6 @@ function oplot2(front::Array{Float64,2}, back::Array{Float64,2}, mask::Array{Boo
   end
   n,m = size(front)
   img = zeros(n,m,3)
-  #imback = zeros(n,m,4)
   for k in 1:m, j in 1:n
     if mask[j,k]
       s = front[j,k]
@@ -97,7 +77,7 @@ end
 
 function makeplots(mat::Dict; outdir::String="results")
   isdir(outdir) || mkdir(outdir)
-  R1map = mat["R1"]
+  R1map = mat["R10"]
   S0map = mat["S0"]
   modelmap = mat["modelmap"]
   Ct = mat["Ct"]
@@ -112,7 +92,7 @@ function makeplots(mat::Dict; outdir::String="results")
 
   figure(figsize=(4.5,4.5))
   clf()
-  plot(mat["t"], mat["aif"], "ko-")
+  plot(mat["t"], mat["Cp"], "ko-")
   xlabel("time (min)")
   yticks([0:5])
   ylabel("[Gd-DTPA] (mM)")

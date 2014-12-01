@@ -65,8 +65,8 @@ end
 
 
 function fitdce{N}(Ct::Array{Float64,N}, mask::BitMatrix, t::Vector{Float64},
-                   Cp::Vector{Float64}; models::Vector{Int64}=[2], verbose::Bool=false,
-                   residthresh::Float64=1.0, ktcutoff::Float64=5.0)
+                   Cp::Vector{Float64}; models=[2], verbose::Bool=false,
+                   residthresh::Float64=1.0, Ktmax::Float64=5.0)
   @dprint "fitting DCE data"
   sizein = size(Ct)
   n = prod(sizein[2:end])
@@ -125,7 +125,7 @@ function fitdce{N}(Ct::Array{Float64,N}, mask::BitMatrix, t::Vector{Float64},
   end
   for k in idxs
     if resid[k] <= residthresh
-      params[1,k] = clamp(params[1,k], eps(), 5.0)
+      params[1,k] = clamp(params[1,k], eps(), Ktmax)
       params[2:end,k] =  clamp(params[2:end,k], eps(), 1.0)
     else
       params[:,k] = 0.0
@@ -142,8 +142,15 @@ end
 
 function runmodel(opts::Dict)
   @dprint "running models"
+
+  # option order of precedence
+  # 1. function arguments
+  # 2. values in "datafile"
+  # 3. defaults
+  defaults = defaultparams()
+  matdict = haskey(opts,"datafile") ? matread(opts["datafile"]) : matread(defaults["datafile"])
+  opts = merge(defaults, merge(matdict, opts))
   validate(opts)
-  opts = merge(defaultparams(), opts)
 
   # load DCE and R1 data
   relaxivity = opts["relaxivity"]
@@ -163,7 +170,7 @@ function runmodel(opts::Dict)
   else
     @dprint "found multi-flip data"
     t1data = opts["T1data"]
-    t1flip = opts["t1flip"] * pi / 180.0
+    t1flip = vec(opts["T1flip"]) * pi / 180.0
     @assert length(t1flip) == size(t1data,1) # must have one flip angle per T1 image
     R10, S0 = fitr1(t1data, t1flip, TR)
   end
@@ -209,5 +216,5 @@ function runmodel(opts::Dict)
 
   results
 end
-runmodel(infile::String) = runmodel(matread(infile)) # point to MAT file
-runmodel(; kwargs...) = runmodel(kwargs2dict(kwargs)) # keyword args
+runmodel(filename::String) = runmodel(datafile=filename) # point to MAT file
+runmodel(; kwargs...)  = runmodel(kwargs2dict(kwargs))

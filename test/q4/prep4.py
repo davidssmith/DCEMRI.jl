@@ -109,21 +109,21 @@ mask_reduced = mask[::10,::10].copy()
 
 print 'writing MAT files'
 mat = {}
-mat["R"] = Rel
+mat["relaxivity"] = Rel
 mat["TR"] = TR
-mat["dcedata"] = data_dce_reduced[:,:,1:]
-mat["dceflip"] = dceflip*180.0/pi
-mat["t1data"] = t1data_reduced[:,:,1:]
-mat["t1flip"] = t1flip
+mat["DCEdata"] = data_dce_reduced[:,:,1:]
+mat["DCEflip"] = dceflip*180.0/pi
+mat["T1data"] = t1data_reduced[:,:,1:]
+mat["T1flip"] = t1flip
 mat["t"] = t
-mat["aif"] = Cp
+mat["Cp"] = Cp
 mat['mask'] = mask_reduced[:,1:]
-mat['extended'] = True
+mat['models'] = arange(3,4)
 savemat(outfile_base + '.mat', mat)
 
 data_dce = abs(data_dce + noise_sigma*(randn(nt,nx,ny) + 1j*randn(nt,nx,ny)) / sqrt(2.0))
 #data_dce = data_dce + noise_sigma*randn(nt,nx,ny) 
-mat["dcedata"] = data_dce[:,:,10:]
-mat["t1data"] = t1data[:,:,10:]
+mat["DCEdata"] = data_dce[:,:,10:]
+mat["T1data"] = t1data[:,:,10:]
 mat["mask"] = mask[:,10:]
 savemat(outfile_base + 'noisy.mat', mat)

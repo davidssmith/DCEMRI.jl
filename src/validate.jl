@@ -2,7 +2,7 @@ using PyPlot
 
 function makeplots6(mat::Dict, outdir::String; dx::Int64=1)
 
-  R1map = mat["R1"]
+  R1map = mat["R10"]
   S0map = mat["S0"]
   modelmap = mat["modelmap"]
   Ct = mat["Ct"]
@@ -23,7 +23,7 @@ function makeplots6(mat::Dict, outdir::String; dx::Int64=1)
   # AIF
   figure(figsize=(4.5,4.5))
   clf()
-  plot(mat["t"], mat["aif"], "ko-")
+  plot(mat["t"], mat["Cp"], "ko-")
   xlabel("time (min)")
   yticks([0:2:10])
   ylim(0,10)
@@ -118,7 +118,7 @@ end
 
 
 function makeplots4(mat::Dict, outdir::String; dx::Int64=1)
-  R1map = mat["R1"]
+  R1map = mat["R10"]
   S0map = mat["S0"]
   modelmap = mat["modelmap"]
   Ct = mat["Ct"]
@@ -139,7 +139,7 @@ function makeplots4(mat::Dict, outdir::String; dx::Int64=1)
   # AIF
   figure(figsize=(4,4))
   clf()
-  plot(mat["t"], mat["aif"], "ko-")
+  plot(mat["t"], mat["Cp"], "ko-")
   xlabel("time (min)")
   #yticks([0:10])
   ylabel("[Gd-DTPA] (mM)")
@@ -265,33 +265,32 @@ end
 
 function makeplots(n::Int64, mat::Dict, outdir::String; dx::Int64=1)
   if n == 4
-    makeplots4(mat, outdir, dx)
+    makeplots4(mat, outdir; dx=dx)
   elseif n == 6
-    makeplots6(mat, outdir, dx)
+    makeplots6(mat, outdir; dx=dx)
   end
 end
 
 
 function validate(n::Int64, outdir::String)
   @assert n == 4 || n == 6 "n must be 4 on 6"
-  cd(Pkg.dir("DCEMRI/tests/q$n"))
+  cd(Pkg.dir("DCEMRI/test/q$n"))
 
   println("Running analysis of noise-free QIBA v$n data ...")
   isdir("$outdir/results") || mkdir("$outdir/results")
-  results = runmodel(datafile="qiba$n.mat",outfile="$outdir/results/results.mat",
-                     models=[2])
+  results = runmodel(datafile="qiba$n.mat",outfile="$outdir/results/results.mat")
   println("Plotting results ...")
-  makeplots6(results, "$outdir/results", dx=10)
+  makeplots(n, results, "$outdir/results", dx=10)
 
   println("Running analysis of noisy QIBA v$n data ...")
   isdir("$outdir/results_noisy") || mkdir("$outdir/results_noisy")
   results = runmodel(datafile="qiba$(n)noisy.mat",
-                     outfile="$outdir/results_noisy/results.mat",
-                     models=[2])
+                     outfile="$outdir/results_noisy/results.mat")
 
   println("Plotting results ...")
-  makeplots6(results, "$outdir/results_noisy")
+  makeplots(n, results, "$outdir/results_noisy")
   println("Validation complete. Results can be found in $outdir.")
 end
-validate(n::Int64) = validate(n, Pkg.dir("DCEMRI/tests/q$n"))
+
+validate(n::Int64) = validate(n, Pkg.dir("DCEMRI/test/q$n"))
 validate() = validate(6) && validate(4)

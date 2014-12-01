@@ -66,24 +66,22 @@ end
 function defaultparams()
   # defaults to use if not specified
   opts = Dict()
-  opts["datafile"] = "input.mat"
-  opts["outfile"] = "output.mat"
+  opts["datafile"]   = "input.mat"
+  opts["outfile"]    = "output.mat"
   opts["relaxivity"] = 4.5
-  opts["SERcutoff"] = 2.0
-  opts["models"] = [2]
-  opts["plotting"] = false
-  opts["verbose"] = true
-  opts["workers"] = 4
+  opts["SERcutoff"]  = 2.0
+  opts["models"]     = [2]
+  opts["plotting"]   = false
+  opts["verbose"]    = true
+  opts["workers"]    = 4
   opts
 end
 
 function validate(d::Dict)
-  if !(haskey(d, "Cp") && haskey(d, "DCEdata") && haskey(d, "t") &&
-       haskey(d, "DCEflip") && haskey(d, "TR") &&
-       ((haskey(d, "R10") && haskey(d, "S0")) ||
-        (haskey(d,"T1data") && haskey(d,"T1flip"))))
-     error("Input must contain Cp, DCEdata, t, DCEflip, TR, and either R10 and S0 or T1data and T1flip.")
+  for k in ["Cp", "DCEdata", "DCEflip", "TR", "t"]
+    @assert haskey(d, k) "Input must contain $k"
   end
+  @assert (haskey(d,"R10") && haskey(d,"S0")) || (haskey(d,"T1data") && haskey(d,"T1flip")) "Input must contain either R10+S0 or T1data+T1flip."
 end
 
 function ccc{T,N}(x::Array{T,N}, y::Array{T,N})

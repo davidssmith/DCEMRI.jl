@@ -1,4 +1,4 @@
-
+using PyPlot
 
 function makeplots6(mat::Dict, outdir::String; dx::Int64=1)
 

@@ -78,10 +78,10 @@ function defaults()
 end
 
 function startworkers(n)
-  if nworkers() < n
-     println("adding $(n-nworkers()) more workers")
-     addprocs(n - nworkers())
-     @everywhere using DCEMRI
+  nadd = nworkers() == 1 ? n : n - nworkers()
+  if nadd > 0
+     println("adding $nadd workers")
+     addprocs(nadd)
   end
 end
 

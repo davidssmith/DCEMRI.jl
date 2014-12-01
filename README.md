@@ -21,12 +21,9 @@ To install __DCEMRI.jl__, run
 ```
 julia> Pkg.clone("http://github.com/davidssmith/DCEMRI.jl")
 ```
-at the `julia>` prompt.  This might take a minute, because the validation data must be downloaded, as well as a few supporting packages. 
+at the `julia>` prompt.  This might take a minute, because the validation data must be downloaded, as well as a few supporting packages.
 
-(If you get an error than `xcrun` is missing on Mac OS X, follow the instructions to install the Developer Tools Command Line Tools, and then switch back to your Julia window and run
-```
-julia> Pkg.build("HDF5")
-```
+If you get an error than `xcrun` is missing on Mac OS X, follow the instructions to install the Developer Tools Command Line Tools, and then switch back to your Julia window and run `Pkg.build("HDF5")`.  This should fix everything.
 If you have other installation errors, please file an issue at the [github repository](http://github.com/davidssmith/DCEMRI.jl).
 
 (Optional) Finally, if you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.

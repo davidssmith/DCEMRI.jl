@@ -20,7 +20,7 @@ function rundemo(outdir::String="results")
 
   println("Demo run complete.")
   if outdir == "results"
-    println("Results can be found in", Pkg.dir("DCEMRI/demo/$outdir"))
+    println("Results can be found in ", Pkg.dir("DCEMRI/demo/$outdir"))
   else
     println("Results can be found in $outdir")
   end

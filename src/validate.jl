@@ -289,6 +289,7 @@ function validate4(outdir::String)
 
   println("Plotting results ...")
   makeplots4(results, "$outdir/results_noisy")
+  println("Validation complete. Results can be found in $outdir.")
 end
 validate4() = validate4(Pkg.dir("DCEMRI/tests/q4"))
 
@@ -318,6 +319,7 @@ function validate6(outdir::String)
 
   println("Plotting results ...")
   makeplots6(results, "$outdir/results_noisy")
+  println("Validation complete. Results can be found in $outdir.")
 end
 validate6() = validate6(Pkg.dir("DCEMRI/tests/q6"))
 

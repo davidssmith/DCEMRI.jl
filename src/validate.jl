@@ -278,13 +278,13 @@ function validate(n::Int64, outdir::String)
 
   println("Running analysis of noise-free QIBA v$n data ...")
   isdir("$outdir/results") || mkdir("$outdir/results")
-  results = runmodel(datafile="qiba$n.mat",outfile="$outdir/results/results.mat")
+  results = fitdata(datafile="qiba$n.mat",outfile="$outdir/results/results.mat")
   println("Plotting results ...")
   makeplots(n, results, "$outdir/results", dx=10)
 
   println("Running analysis of noisy QIBA v$n data ...")
   isdir("$outdir/results_noisy") || mkdir("$outdir/results_noisy")
-  results = runmodel(datafile="qiba$(n)noisy.mat",
+  results = fitdata(datafile="qiba$(n)noisy.mat",
                      outfile="$outdir/results_noisy/results.mat")
 
   println("Plotting results ...")

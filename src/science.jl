@@ -13,11 +13,11 @@ function ser{N}(x::Array{Float64,N}, thresh::Float64=0.01)
   reshape(SER, dims[2:end])
 end
 
-function r1eff(S::Array{Float64,3}, S0::Matrix{Float64}, R10::Matrix{Float64},
-               TR::Float64, flip::Float64)
+function r1eff(S::Array{Float64,3}, R10::Matrix{Float64}, TR::Float64, flip::Float64)
   @dprint "converting DCE signal to effective R1"
   @assert 0.0 < flip "flip angle must be positive"
   @assert 0.0 < TR && TR < 1.0 "TR must be in units of ms"
+  S0 = squeeze(mean(S[1:2,:,:],1),1)
   nt, nx, ny = size(S)
   A = copy(S)
   R1 = similar(S)
@@ -65,8 +65,7 @@ end
 
 
 function fitdce{N}(Ct::Array{Float64,N}, mask::BitMatrix, t::Vector{Float64},
-                   Cp::Vector{Float64}; models=[2], verbose::Bool=false,
-                   residthresh::Float64=1.0, Ktmax::Float64=5.0)
+                   Cp::Vector{Float64}; models=[2], residthresh=1.0, Ktmax=5.0)
   @dprint "fitting DCE data"
   sizein = size(Ct)
   n = prod(sizein[2:end])
@@ -140,16 +139,17 @@ end
 
 
 
-function runmodel(opts::Dict)
+function fitdata(opts::Dict)
   @dprint "running models"
 
   # option order of precedence
   # 1. function arguments
   # 2. values in "datafile"
   # 3. defaults
-  defaults = defaultparams()
-  matdict = haskey(opts,"datafile") ? matread(opts["datafile"]) : matread(defaults["datafile"])
-  opts = merge(defaults, merge(matdict, opts))
+  def = defaults()
+  infile = haskey(opts,"datafile") ? opts["datafile"] : def["datafile"]
+  mat = matread(infile)
+  opts = merge(def, merge(mat, opts))
   validate(opts)
 
   # load DCE and R1 data
@@ -176,8 +176,8 @@ function runmodel(opts::Dict)
   end
 
   dcedata = opts["DCEdata"]
-  t = vec(opts["t"]) / 60.0  # convert time to min
   dceflip = opts["DCEflip"] * pi / 180.0
+  t = vec(opts["t"]) / 60.0  # convert time to min
 
   nt, nx, ny = size(dcedata)
   @assert nx == size(R10,1) "R10 map and DCE images have different numbers of rows"
@@ -185,16 +185,14 @@ function runmodel(opts::Dict)
 
   # MAIN: run postprocessing steps
   SER = ser(dcedata)
-  S0 = squeeze(mean(dcedata[1:2,:,:],1),1)
-  R1 = r1eff(dcedata, S0, R10, TR, dceflip)
-  Ct = tissueconc(R1, R10, relaxivity)
-  if haskey(opts, "mask")
+  if haskey(opts, "mask") # if mask specified, use it
       mask = convert(BitArray{2}, opts["mask"])
-  else
+  else   # use SER threshold
       mask = SER .> opts["SERcutoff"]
   end
-  params, resid, modelmap = fitdce(Ct, mask, t, Cp, models=models,
-                                   verbose=opts["verbose"])
+  R1 = r1eff(dcedata, R10, TR, dceflip)
+  Ct = tissueconc(R1, R10, relaxivity)
+  params, resid, modelmap = fitdce(Ct, mask, t, Cp, models=models)
 
   @dprint "saving results to $outfile"
   results = Dict()
@@ -216,5 +214,5 @@ function runmodel(opts::Dict)
 
   results
 end
-runmodel(filename::String) = runmodel(datafile=filename) # point to MAT file
-runmodel(; kwargs...)  = runmodel(kwargs2dict(kwargs))
+fitdata(filename::String) = fitdata(datafile=filename) # point to MAT file
+fitdata(; kwargs...) = fitdata(kwargs2dict(kwargs))

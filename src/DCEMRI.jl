@@ -4,8 +4,8 @@ using ArgParse
 using Calculus    #.jacobian
 using MAT
 
-export ser, r1eff, tissueconc, fitr1, fitdce, runmodel,
-  defaultparams, ccc, nlsfit, demo, makeplots, validate
+export ser, r1eff, tissueconc, fitr1, fitdce, fitdata,
+  defaults, ccc, nlsfit, makeplots, demo, validate
 
 const verbose = true
 const version = "v0.3"

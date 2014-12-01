@@ -4,7 +4,7 @@ function demo(outdir::String="results")
   println("Processing in vivo data ...")
 
   # run the model
-  results = runmodel(datafile="invivo.mat", outfile="$outdir/results.mat", models=[2])
+  results = fitdata(datafile="invivo.mat", outfile="$outdir/results.mat", models=[2])
 
   # plot the results
   println("Plotting results ...")

@@ -63,7 +63,7 @@ function parsefromargs()
   parsed_args
 end
 
-function defaultparams()
+function defaults()
   # defaults to use if not specified
   opts = Dict()
   opts["datafile"]   = "input.mat"

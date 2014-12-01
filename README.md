@@ -13,19 +13,19 @@ Put simply, it looks like Matlab, which is simple to learn and familiar to most 
 
 ## Installation
 
-1. To get running, you need two things for sure: Julia and __DCEMRI.jl__.
-The simplest way to get Julia is to download the current release version from [julialang.org](http://julialang.org/downloads/).
+Installation is simple.  First you need Julia.
+The simplest way to get Julia is to grab the current release version from [julialang.org](http://julialang.org/downloads/).
 
-2. Once Julia is installed, open it. You should see a terminal window with the `julia>` prompt.  This is analogous to the command line in Matlab.
+Next you need __DCEMRI.jl__.  Open Julia. You should see a terminal window with the `julia>` prompt.  This is analogous to the command line in Matlab.
 To install __DCEMRI.jl__, run
 ```
 julia> Pkg.clone("http://github.com/davidssmith/DCEMRI.jl")
 ```
 at the `julia>` prompt.
 
-3. (Optional) If you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
-To install Matplotlib on most machines, you can run `easy_install matplotlib`.  If that doesn't work, you can try `pip install matplotlib`.
-If neither works, see the Matplotlib [install FAQ](http://matplotlib.org/faq/installing_faq.html).
+(Optional) Finalyl, if you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
+Most machines probably already have a version of Python installed.  It is a ubiquitous scripting language.  To install Matplotlib on top of it, you can run `easy_install matplotlib`.  If that doesn't work, you can try `pip install matplotlib`.
+If neither works, see the Matplotlib [install FAQ](http://matplotlib.org/faq/installing_faq.html).  If you don't have Python at all for some reason, you can grab the excellent [Anaconda distribution](https://store.continuum.io/cshop/anaconda/), which comes with Matplotlib pre-installed.
 
 Now you're ready to roll!
 

@@ -96,7 +96,7 @@ function nlsfitworker(model::Function, y::Matrix{Float64},
   (params, resids)
 end
 
-function nlsfit(f::Function, y::Matrix{Float64}, idxs::Vector{Int64},
+function nlsfit(f::Function, y::Matrix{Float64}, idxs::Vector{Int},
                 x::Vector{Float64}, p0::Vector{Float64})
   tic()
   nt, n = size(y)

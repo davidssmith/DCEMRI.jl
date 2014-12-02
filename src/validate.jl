@@ -263,7 +263,7 @@ function makeplots4(mat::Dict, outdir::String; dx::Int64=1)
   savefig("$outdir/vp_error.pdf")
 end
 
-function makeplots(n::Int64, mat::Dict, outdir::String; dx::Int64=1)
+function makeplots(n, mat::Dict, outdir::String; dx::Int64=1)
   if n == 4
     makeplots4(mat, outdir; dx=dx)
   elseif n == 6
@@ -272,8 +272,8 @@ function makeplots(n::Int64, mat::Dict, outdir::String; dx::Int64=1)
 end
 
 
-function validate(n::Int64, outdir::String)
-  @assert n == 4 || n == 6 "n must be 4 on 6"
+function validate(n, outdir::String)
+  @assert n == 4 || n == 6 "n must be 4 or 6"
   cd(Pkg.dir("DCEMRI/test/q$n"))
 
   println("Running analysis of noise-free QIBA v$n data ...")
@@ -292,5 +292,5 @@ function validate(n::Int64, outdir::String)
   println("Validation complete. Results can be found in $outdir.")
 end
 
-validate(n::Int64) = validate(n, Pkg.dir("DCEMRI/test/q$n"))
+validate(n) = validate(n, Pkg.dir("DCEMRI/test/q$n"))
 validate() = validate(6) && validate(4)

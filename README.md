@@ -37,9 +37,112 @@ If you have installation problems, check the next section on platform specific i
 
 If you get an error that `xcrun` is missing on Mac OS X, follow the instructions to install the Developer Tools Command Line Tools, and then switch back to your Julia window and run `Pkg.build("HDF5")`.  This should fix everything.  If you don't get this error, but installation fails, make sure you have Xcode installed, along with the optional Command Line Tools.
 
+There have also been reports of Julia popping up behind other windows on OS X.  Look behind your windows if you think Julia isn't starting.
+
 ### Windows
 
 On Windows, you will almost certainly need to install [Anaconda](https://store.continuum.io/cshop/anaconda/) to have a Python distribution. Some Windows versions claim to be 64-bit, but aren't quite.  If you are having trouble on Windows, and you have installed a 64-bit Anaconda and Julia, you can try uninstalling them and installing 32-bit versions of both.
+
+## Validating the Installation
+
+After installing the Julia and the __DCEMRI__ module, you should run the validations, to make sure the calculations work correctly on your machine.  The easiest way to do this is to start Julia and then run
+```
+julia> using DCEMRI
+
+julia> validate()
+```
+This will run both validations (4 and 6), which could take up to an hour, depending on the number of cores you started Julia with and how fast your hardware is. Examine the results to make sure that the parameters have been recovered accurately.  The text output of the scripts will also print quantitative measures of parameter accuracy. By default validation results will be written to subdirectories of the __DCEMRI.jl__ module directory, which is `$HOME/.julia/v0.3/DCEMRI` on Unix-based systems.  You can customize this directory for the validation by passing the output path as the second argument.  This only works the individual validation functions, e.g. `validate(6, "/my/path")` or `validate(4, "/my/path")`.  Since both validations write figures with identical names, they can't go to the same output directory. 
+
+An example output is shown here:
+
+```
+julia> validate(4)
+Running analysis of noise-free QIBA v4 data ...
+running models
+found multi-flip data
+fitting R1 relaxation rate to multi-flip data
+fitting 6 x 23 points on each of 4 workers
+processed 90 voxels in 2.2 s (41.5 vox/s)
+
+computing signal enhancement ratios
+converting DCE signal to effective R1
+converting effective R1 to tracer tissue concentration Ct
+fitting DCE data
+attempting Extended Tofts-Kety model
+fitting 661 x 23 points on each of 4 workers
+processed 90 voxels in 3.8 s (23.5 vox/s)
+
+saving results to /Users/dss/.julia/v0.3/DCEMRI/test/q4/results/results.mat
+Plotting results ...
+Kt RMSE (%): 6.97465437361441
+Kt max error (%): 23.493640353851994
+Kt CCC: 0.9998009845162595
+ve RMSE (%): 18.02170557638968
+ve max error (%): 99.99999999999996
+ve CCC: 0.8904290685710147
+vp RMSE (%): 23.770196145538407
+vp max error (%): 92.10583127104924
+vp CCC: 0.9999200988268792
+Running analysis of noisy QIBA v4 data ...
+running models
+found multi-flip data
+fitting R1 relaxation rate to multi-flip data
+fitting 6 x 2250 points on each of 4 workers
+processed 9000 voxels in 0.5 s (19436.3 vox/s)
+
+computing signal enhancement ratios
+converting DCE signal to effective R1
+converting effective R1 to tracer tissue concentration Ct
+fitting DCE data
+attempting Extended Tofts-Kety model
+fitting 661 x 2250 points on each of 4 workers
+processed 9000 voxels in 341.7 s (26.3 vox/s)
+
+saving results to /Users/dss/.julia/v0.3/DCEMRI/test/q4/results_noisy/results.mat
+Plotting results ...
+Kt RMSE (%): 11.311615941962662
+Kt max error (%): 100.0
+Kt CCC: 0.9742179876687028
+ve RMSE (%): 18.238054961776477
+ve max error (%): 100.0
+ve CCC: 0.7026132423939505
+vp RMSE (%): 12.654024477709797
+vp max error (%): 100.0
+vp CCC: 0.9717255972607232
+Validation complete. Results can be found in /Users/dss/.julia/v0.3/DCEMRI/test/q4.
+```
+
+To perform the validation on the Quantitative Imaging Biomarkers Alliance phantoms for yourself from the original DICOMS, you will need to download the DICOMS from [Daniel Barboriak's Lab](https://dblab.duhs.duke.edu/modules/QIBAcontent/index.php?id=1).  Then the scripts in the `q4` and `q6` folders will help you translate the DICOM data to MAT files suitable for input into the Julia code.
+
+I have already done this step for you and included the MAT files.  This also avoids you needing to install Python if you don't have it already.  If you want to install Python and run the scripts to convert the DICOM data to MAT files, then I recommend the [Anaconda](http://continuum.io) Python distribution. It has everything you need for scientific programming with Python.
+
+## Running the In Vivo Demo
+
+You can run the in vivo data demo with the command
+`demo()`.  It will save the output by default to `$HOME/.julia/v0.3/DCEMRI/demo/results` by default.  You can change this location by passing a path string to `demo()`.  After a few seconds to a few minutes, depending on the speed of your machine, you will see the following output text:
+
+```
+julia> demo()
+Processing in vivo data ...
+running models
+found multi-flip data
+fitting R1 relaxation rate to multi-flip data
+fitting 10 x 4582 points on each of 4 workers
+processed 18327 voxels in 1.0 s (19055.6 vox/s)
+
+computing signal enhancement ratios
+converting DCE signal to effective R1
+converting effective R1 to tracer tissue concentration Ct
+fitting DCE data
+attempting Standard Tofts-Kety model
+fitting 25 x 1694 points on each of 4 workers
+processed 6774 voxels in 1.1 s (5928.8 vox/s)
+
+saving results to results/results.mat
+Plotting results ...
+Demo run complete.
+Results can be found in /Users/dss/.julia/v0.3/DCEMRI/demo/results
+```
 
 ## A Note about Units
 
@@ -131,104 +234,6 @@ The results will be saved in the current directory as `results.mat`.  You can ov
 
 
 
-## Validating the Installation
-
-After installing the Julia and the __DCEMRI__ module, you should run the validations, to make sure the calculations work correctly on your machine.  The easiest way to do this is to start Julia and then run
-```
-julia> using DCEMRI
-
-julia> validate()
-```
-This will run both validations (4 and 6), which could take up to an hour, depending on the number of cores you started Julia with. Examine the results to make sure that the parameters have been recovered accurately.  You can also check the text output of the scripts to see quantitative measures of parameter accuracy.  An example output is shown here:
-
-```
-julia> validate(4)
-Running analysis of noise-free QIBA v4 data ...
-running models
-found multi-flip data
-fitting R1 relaxation rate to multi-flip data
-fitting 6 x 23 points on each of 4 workers
-processed 90 voxels in 2.2 s (41.5 vox/s)
-
-computing signal enhancement ratios
-converting DCE signal to effective R1
-converting effective R1 to tracer tissue concentration Ct
-fitting DCE data
-attempting Extended Tofts-Kety model
-fitting 661 x 23 points on each of 4 workers
-processed 90 voxels in 3.8 s (23.5 vox/s)
-
-saving results to /Users/dss/.julia/v0.3/DCEMRI/test/q4/results/results.mat
-Plotting results ...
-Kt RMSE (%): 6.97465437361441
-Kt max error (%): 23.493640353851994
-Kt CCC: 0.9998009845162595
-ve RMSE (%): 18.02170557638968
-ve max error (%): 99.99999999999996
-ve CCC: 0.8904290685710147
-vp RMSE (%): 23.770196145538407
-vp max error (%): 92.10583127104924
-vp CCC: 0.9999200988268792
-Running analysis of noisy QIBA v4 data ...
-running models
-found multi-flip data
-fitting R1 relaxation rate to multi-flip data
-fitting 6 x 2250 points on each of 4 workers
-processed 9000 voxels in 0.5 s (19436.3 vox/s)
-
-computing signal enhancement ratios
-converting DCE signal to effective R1
-converting effective R1 to tracer tissue concentration Ct
-fitting DCE data
-attempting Extended Tofts-Kety model
-fitting 661 x 2250 points on each of 4 workers
-processed 9000 voxels in 341.7 s (26.3 vox/s)
-
-saving results to /Users/dss/.julia/v0.3/DCEMRI/test/q4/results_noisy/results.mat
-Plotting results ...
-Kt RMSE (%): 11.311615941962662
-Kt max error (%): 100.0
-Kt CCC: 0.9742179876687028
-ve RMSE (%): 18.238054961776477
-ve max error (%): 100.0
-ve CCC: 0.7026132423939505
-vp RMSE (%): 12.654024477709797
-vp max error (%): 100.0
-vp CCC: 0.9717255972607232
-Validation complete. Results can be found in /Users/dss/.julia/v0.3/DCEMRI/test/q4.
-```
-
-To perform the validation on the Quantitative Imaging Biomarkers Alliance phantoms for yourself from the original DICOMS, you will need to download the DICOMS from [Daniel Barboriak's Lab](https://dblab.duhs.duke.edu/modules/QIBAcontent/index.php?id=1).  Then the scripts in the `q4` and `q6` folders will help you translate the DICOM data to MAT files suitable for input into the Julia code.
-
-I have already done this step for you and included the MAT files.  This also avoids you needing to install Python if you don't have it already.  If you want to install Python and run the scripts to convert the DICOM data to MAT files, then I recommend the [Anaconda](http://continuum.io) Python distribution. It has everything you need for scientific programming with Python.
-
-## Running the In Vivo Demo
-
-You can run the in vivo data demo with the command
-`demo()`.  After a few seconds to a few minutes, depending on the speed of your machine, you will see the following output text:
-
-```
-julia> demo()
-Processing in vivo data ...
-running models
-found multi-flip data
-fitting R1 relaxation rate to multi-flip data
-fitting 10 x 4582 points on each of 4 workers
-processed 18327 voxels in 1.0 s (19055.6 vox/s)
-
-computing signal enhancement ratios
-converting DCE signal to effective R1
-converting effective R1 to tracer tissue concentration Ct
-fitting DCE data
-attempting Standard Tofts-Kety model
-fitting 25 x 1694 points on each of 4 workers
-processed 6774 voxels in 1.1 s (5928.8 vox/s)
-
-saving results to results/results.mat
-Plotting results ...
-Demo run complete.
-Results can be found in /Users/dss/.julia/v0.3/DCEMRI/demo/results
-```
 
 ## Concluding Remarks
 

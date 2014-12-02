@@ -8,7 +8,7 @@ export ser, r1eff, tissueconc, fitr1, fitdce, fitdata,
   defaults, ccc, nlsfit, makeplots, demo, validate
 
 const verbose = true
-const version = v"1.0.0"
+const version = v"0.1.0"
 
 include("util.jl")
 include("fitting.jl")

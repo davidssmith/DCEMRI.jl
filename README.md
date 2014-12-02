@@ -238,4 +238,4 @@ To keep your installation of __DCEMRI.jl__ up to date, periodically run `Pkg.upd
 
 ## Funding Sources
 
-This project was funded by the National Cancer Institute of the National Institutes of Health, under grants K25CA176219, U01CA142565, R01CA129961, R25CA092043. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
+This project was funded by the National Cancer Institute of the National Institutes of Health, under Award Numbers K25CA176219, U01CA142565, R01CA129961, R25CA092043. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.

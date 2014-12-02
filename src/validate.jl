@@ -293,4 +293,7 @@ function validate(n, outdir::String)
 end
 
 validate(n) = validate(n, Pkg.dir("DCEMRI/test/q$n"))
-validate() = validate(6) && validate(4)
+function validate()
+  validate(6)
+  validate(4)
+end

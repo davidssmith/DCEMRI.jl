@@ -23,14 +23,23 @@ julia> Pkg.clone("http://github.com/davidssmith/DCEMRI.jl")
 ```
 at the `julia>` prompt.  This might take a minute, because the validation data must be downloaded, as well as a few supporting packages.
 
-If you get an error than `xcrun` is missing on Mac OS X, follow the instructions to install the Developer Tools Command Line Tools, and then switch back to your Julia window and run `Pkg.build("HDF5")`.  This should fix everything.
-If you have other installation errors, please file an issue at the [github repository](http://github.com/davidssmith/DCEMRI.jl).
-
-(Optional) Finally, if you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
-Most machines probably already have a version of Python with Matplotlib installed.
-If you don't have Python with Matplotlib, you can grab the excellent [Anaconda distribution](https://store.continuum.io/cshop/anaconda/), which comes with Matplotlib pre-installed.
-
 Now you're ready to roll!
+
+(Optional) If you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
+Most OS X and Linux machines probably already have a version of Python with Matplotlib installed.
+If you don't have Python with Matplotlib, you can grab the excellent [Anaconda python distribution](https://store.continuum.io/cshop/anaconda/), which comes with Matplotlib pre-installed.
+
+If you have installation problems, check the next section on platform specific issues.  If none of that helps, please file an issue at the [github repository](http://github.com/davidssmith/DCEMRI.jl), and we will try to help you.
+
+## Platform Specific Notes
+
+### Mac OS X
+
+If you get an error that `xcrun` is missing on Mac OS X, follow the instructions to install the Developer Tools Command Line Tools, and then switch back to your Julia window and run `Pkg.build("HDF5")`.  This should fix everything.  If you don't get this error, but installation fails, make sure you have Xcode installed, along with the optional Command Line Tools.
+
+### Windows
+
+On Windows, you will almost certainly need to install [Anaconda](https://store.continuum.io/cshop/anaconda/) to have a Python distribution. Some Windows versions claim to be 64-bit, but aren't quite.  If you are having trouble on Windows, and you have installed a 64-bit Anaconda and Julia, you can try uninstalling them and installing 32-bit versions of both.
 
 ## A Note about Units
 

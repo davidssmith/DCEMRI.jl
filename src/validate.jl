@@ -1,6 +1,6 @@
 using PyPlot
 
-function makeplots6(mat::Dict, outdir::String; dx::Int64=1)
+function makeplots6(mat::Dict, outdir::String; dx=1)
 
   R1map = mat["R10"]
   S0map = mat["S0"]
@@ -117,7 +117,7 @@ end
 
 
 
-function makeplots4(mat::Dict, outdir::String; dx::Int64=1)
+function makeplots4(mat::Dict, outdir::String; dx=1)
   R1map = mat["R10"]
   S0map = mat["S0"]
   modelmap = mat["modelmap"]
@@ -263,7 +263,7 @@ function makeplots4(mat::Dict, outdir::String; dx::Int64=1)
   savefig("$outdir/vp_error.pdf")
 end
 
-function makeplots(n, mat::Dict, outdir::String; dx::Int64=1)
+function makeplots(n, mat::Dict, outdir::String; dx=1)
   if n == 4
     makeplots4(mat, outdir; dx=dx)
   elseif n == 6

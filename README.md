@@ -19,7 +19,7 @@ The simplest way to get Julia is to grab the current release version from [julia
 Next you need __DCEMRI.jl__.  Open Julia. You should see a terminal window with the `julia>` prompt.  This is analogous to the command line in Matlab.
 To install __DCEMRI.jl__, run
 ```
-julia> Pkg.clone("http://github.com/davidssmith/DCEMRI.jl")
+julia> Pkg.add("DCEMRI")
 ```
 at the `julia>` prompt.  This might take a minute, because the validation data must be downloaded, as well as a few supporting packages.
 

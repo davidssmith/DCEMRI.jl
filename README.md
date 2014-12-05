@@ -23,11 +23,9 @@ julia> Pkg.add("DCEMRI")
 ```
 at the `julia>` prompt.  This might take a minute, because the validation data must be downloaded, as well as a few supporting packages.
 
-Now you're ready to roll!
-
-(Optional) If you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
+If you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
 Most OS X and Linux machines probably already have a version of Python with Matplotlib installed.
-If you don't have Python with Matplotlib, you can grab the excellent [Anaconda python distribution](https://store.continuum.io/cshop/anaconda/), which comes with Matplotlib pre-installed.
+If you don't have Python with Matplotlib, such as if you are on Windows, you can grab the excellent, free [Anaconda python distribution](https://store.continuum.io/cshop/anaconda/), which comes with Matplotlib pre-installed.
 
 If you have installation problems, check the next section on platform specific issues.  If none of that helps, please file an issue at the [github repository](http://github.com/davidssmith/DCEMRI.jl), and we will try to help you.
 
@@ -244,3 +242,5 @@ To keep your installation of __DCEMRI.jl__ up to date, periodically run `Pkg.upd
 ## Funding Sources
 
 This project was funded by the National Cancer Institute of the National Institutes of Health, under Award Numbers K25CA176219, U01CA142565, R01CA129961, R25CA092043. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
+
+[![Analytics](https://ga-beacon.appspot.com/UA-57394339-1/DCEMRI.jl/README.md?pixel)](https://github.com/igrigorik/ga-beacon)

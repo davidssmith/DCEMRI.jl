@@ -3,6 +3,8 @@ DCEMRI.jl
 
 A Fast, Validated Open Source Toolkit for Dynamic Contrast Enhanced MRI Analysis
 
+[![Build Status](https://travis-ci.org/davidssmith/DCEMRI.jl.png?branch=master)](https://travis-ci.org/davidssmith/DCEMRI.jl)
+
 ## Why Julia?
 
 From the [Julia website](http://julialang.org/),

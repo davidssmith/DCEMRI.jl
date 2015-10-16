@@ -1,4 +1,4 @@
-function demo(outdir::String="results")
+function demo(outdir::AbstractString="results")
   cd(Pkg.dir("DCEMRI/demo"))
   isdir(outdir) || mkdir(outdir)
   println("Processing in vivo data ...")

@@ -79,7 +79,7 @@ function fitdce{N}(Ct::Array{Float64,N}, mask::BitMatrix, t::Vector{Float64},
   @assert nmodels > 0 "at least one model must be specified"
   resid = Inf*ones(n)
   params = zeros(3, n)
-  modelmap = zeros(Uint8, n)
+  modelmap = zeros(UInt8, n)
 
   if 3 in models
     @dprint "attempting Extended Tofts-Kety model"
@@ -216,5 +216,5 @@ function fitdata(opts::Dict)
 
   results
 end
-fitdata(filename::String) = fitdata(datafile=filename) # point to MAT file
+fitdata(filename::AbstractString) = fitdata(datafile=filename) # point to MAT file
 fitdata(; kwargs...) = fitdata(kwargs2dict(kwargs))

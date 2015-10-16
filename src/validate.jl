@@ -1,6 +1,6 @@
 using PyPlot
 
-function makeplots6(mat::Dict, outdir::String; dx=1)
+function makeplots6(mat::Dict, outdir::AbstractString; dx=1)
 
   R1map = mat["R10"]
   S0map = mat["S0"]
@@ -117,7 +117,7 @@ end
 
 
 
-function makeplots4(mat::Dict, outdir::String; dx=1)
+function makeplots4(mat::Dict, outdir::AbstractString; dx=1)
   R1map = mat["R10"]
   S0map = mat["S0"]
   modelmap = mat["modelmap"]
@@ -263,7 +263,7 @@ function makeplots4(mat::Dict, outdir::String; dx=1)
   savefig("$outdir/vp_error.pdf",bbox_inches="tight")
 end
 
-function makeplots(n, mat::Dict, outdir::String; dx=1)
+function makeplots(n, mat::Dict, outdir::AbstractString; dx=1)
   if n == 4
     makeplots4(mat, outdir; dx=dx)
   elseif n == 6
@@ -272,7 +272,7 @@ function makeplots(n, mat::Dict, outdir::String; dx=1)
 end
 
 
-function validate(n, outdir::String)
+function validate(n, outdir::AbstractString)
   @assert n == 4 || n == 6 "n must be 4 or 6"
   cd(Pkg.dir("DCEMRI/test/q$n"))
 

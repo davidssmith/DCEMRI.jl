@@ -17,7 +17,7 @@ jetgray(x::Float64) = x <= 0.01 ? grayrgb(100x) : jetrgb(x)
 
 function redblue(x::Float64)
   cmap = colormap("RdBu")
-  idx = int(99x + 1)
+  idx = round(Int,99x + 1)
   cmap[idx]
 end
 
@@ -62,11 +62,11 @@ function oplot2(front::Array{Float64,2}, back::Array{Float64,2}, mask::Array{Boo
     if mask[j,k]
       s = front[j,k]
       s = clamp(s, 0.0, 1.0)
-      cmidx = 100 - int(99.0*s)
+      cmidx = 100 - round(Int,99.0*s)
       img[j,k,:] = jetrgb(s)
     else
       s = back[j,k]
-      cmidx = 100 - int(99.0*s)
+      cmidx = 100 - round(Int,99.0*s)
       img[j,k,1] = s
       img[j,k,2] = s
       img[j,k,3] = s
@@ -75,7 +75,7 @@ function oplot2(front::Array{Float64,2}, back::Array{Float64,2}, mask::Array{Boo
   img
 end
 
-function makeplots(mat::Dict; outdir::String="results")
+function makeplots(mat::Dict; outdir::AbstractString="results")
   isdir(outdir) || mkdir(outdir)
   R1map = mat["R10"]
   S0map = mat["S0"]
@@ -94,7 +94,7 @@ function makeplots(mat::Dict; outdir::String="results")
   clf()
   plot(mat["t"], mat["Cp"], "ko-")
   xlabel("time (min)")
-  yticks([0:5])
+  yticks(collect(0:5))
   ylabel("[Gd-DTPA] (mM)")
   title("arterial input function, \$C_p\$")
   savefig("$outdir/aif.pdf")
@@ -116,7 +116,7 @@ function makeplots(mat::Dict; outdir::String="results")
   clf()
   imshow(R1map, interpolation="nearest", cmap="cubehelix", vmin=0, vmax=5)
   title("\$R_1\$ relaxation rate (s\$^{-1}\$)")
-  colorbar(ticks=[0:5])
+  colorbar(ticks=collect(0:5))
   savefig("$outdir/R1.pdf")
 
   figure()
@@ -140,7 +140,7 @@ function makeplots(mat::Dict; outdir::String="results")
   x = oplot2(clamp(Kt, 0.0, 1.0), back, mask)
   imshow(x, interpolation="nearest", cmap="jet", vmin=0, vmax=1)
   title("\$K^\\mathrm{trans}\$ (min\$^{-1}\$)")
-  colorbar(ticks=[0:2:10]/10.0)
+  colorbar(ticks=collect(0:2:10)/10.0)
   savefig("$outdir/Kt.pdf")
 
   figure()
@@ -185,7 +185,7 @@ function makeplots(mat::Dict; outdir::String="results")
   savefig("$outdir/resid.pdf")
 end
 
-function makeplots(matfile::String)
+function makeplots(matfile::AbstractString)
   println("creating plots from the file ", matfile)
   mat = read(matopen(matfile))
   makeplots(mat)

@@ -107,7 +107,7 @@ function nlsfit(f::Function, y::Matrix{Float64}, idxs::Vector{Int},
   dof = nt - length(p0)
   if nw > 1
     reflist = Any[]
-    idxperworker = int(nidxs / nw)
+    idxperworker = round(Int, nidxs / nw)
     workeridxs = Any[idxs[(w-1)*idxperworker+1:min(w*idxperworker,nidxs)] for w in 1:nw]
     @dprint "fitting $nt x $idxperworker points on each of $nw workers"
     workerids = workers()

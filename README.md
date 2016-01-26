@@ -159,7 +159,7 @@ julia> using DCEMRI
 
 julia> results = fitdata(datafile="/path/to/your/datafile.mat")
 ```
-__DCEMRI.jl__ will look for parameters in the input MAT file, and if they are found will use them.  Anything not found in the MAT file will be initialized from the defaults.  These defaults can be viewed with the `defaultparams()` command.  You may also override both the MAT file and the defaults by passing keyword arguments to `fitdata`.
+__DCEMRI.jl__ will look for parameters in the input MAT file, and if they are found will use them.  Anything not found in the MAT file will be initialized from the defaults.  These defaults can be viewed with the `defaults()` command.  You may also override both the MAT file and the defaults by passing keyword arguments to `fitdata`.
 
 ### As a shell command
 

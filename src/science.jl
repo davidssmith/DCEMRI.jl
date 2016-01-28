@@ -50,11 +50,13 @@ function fitr1(x, flip_angles::Vector{Float64}, TR::Float64,
                resid_thresh::Float64=0.01)
   @dprint "fitting R1 relaxation rate to multi-flip data"
   sizein = size(x)
-  n = prod(sizein[2:end])
-  nangles = sizein[1]
+  n = prod(sizein[1:end-1])
+  nangles = sizein[end]
   @assert nangles == length(flip_angles)
   x = reshape(x, (nangles, n))
   p0 = [maximum(x), 1.0]
+  
+  # What is this?
   model(x,p) = spgreqn(x, p, TR)
   idxs = find(mean(x, 1) .> 0.1*maximum(x))
   params, resid = nlsfit(model, x, idxs, flip_angles, p0)

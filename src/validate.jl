@@ -15,8 +15,8 @@ function makeplots6(mat::Dict, outdir::AbstractString; dx=1)
   back = (S0map - minimum(S0map)) / (maximum(S0map) - minimum(S0map))
   mask = convert(Array{Bool,2}, mat["mask"])
 
-  ytpos = [(0+floor(Integer, 5/dx)):div(10,dx):(div(60,dx)-1)]
-  xtpos = [(0+floor(Integer, 5/dx)):div(10,dx):(div(50,dx)-1)]
+  ytpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(60,dx)-1))
+  xtpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(50,dx)-1))
   ytlabels = [string(x) for x in [0.01,0.02,0.05,0.1,0.2,0.35]]
   xtlabels = [string(x) for x in [0.01,0.05,0.1,0.2,0.5]]
 
@@ -78,8 +78,8 @@ function makeplots6(mat::Dict, outdir::AbstractString; dx=1)
 
   # compare to known truths
   u = ones(div(10,dx),div(10,dx))
-  Kt_truth = repmat([0.01*u, 0.02*u, 0.05*u, 0.1*u, 0.2*u, 0.35*u], 1, 5)
-  ve_truth = repmat([0.01*u, 0.05*u, 0.1*u, 0.2*u, 0.5*u]', 6, 1)
+  Kt_truth = repmat([0.01*u; 0.02*u; 0.05*u; 0.1*u; 0.2*u; 0.35*u], 1, 5)
+  ve_truth = repmat([0.01*u; 0.05*u; 0.1*u; 0.2*u; 0.5*u]', 6, 1)
 
   Kt_error = clamp(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
   ve_error = clamp(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)

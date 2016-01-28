@@ -55,11 +55,9 @@ function fitr1(x, flip_angles::Vector{Float64}, TR::Float64,
   @assert nangles == length(flip_angles)
   x = reshape(x, (nangles, n))
   p0 = [maximum(x), 1.0]
-  
-  # What is this?
   model(x,p) = spgreqn(x, p, TR)
   idxs = find(mean(x, 1) .> 0.1*maximum(x))
-  params, resid = nlsfit(model, x, idxs, flip_angles, p0)
+  params, resid = nlsfit(model, x, idxs, flip_angles, p0) # GIVES ERROR
   S0 = reshape(params[1,:], sizein[2:end])
   R10 = reshape(params[2,:], sizein[2:end])
   (R10, S0, resid)

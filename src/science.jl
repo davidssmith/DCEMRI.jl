@@ -13,7 +13,7 @@ function ser{N}(x::Array{Float64,N}, thresh::Float64=0.01)
   reshape(SER, dims[2:end])
 end
 
-function r1eff(S::Array{Float64,3}, R10::Matrix{Float64}, TR::Float64, flip::Float64)
+function r1eff{M,N}(S::Array{Float64,M}, R10::Matrix{Float64,N}, TR::Float64, flip::Float64)
   @dprint "converting DCE signal to effective R1"
   @assert 0.0 < flip "flip angle must be positive"
   @assert 0.0 < TR && TR < 1.0 "TR must be in units of ms"

@@ -33,7 +33,7 @@ function r1eff{M,N}(S::Array{Float64,M}, R10::Array{Float64,N}, TR::Float64, fli
       R1[t,k] = E > 0.0 ? (-1.0 / TR) * log(E) : 0.0
     end
   end
-  reshape(R1, (nt, dims[2:end]))
+  reshape(R1, dims)
 end
 
 function tissueconc{M,N}(R1::Array{Float64,M}, R10::Array{Float64,N}, r1::Float64)

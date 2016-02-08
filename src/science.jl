@@ -23,7 +23,7 @@ function r1eff{M,N}(S::Array{Float64,M}, R10::Array{Float64,N}, TR::Float64, fli
   S = reshape(S, (nt, n))
   S0 = mean(S[1:2,:],1)
   A = copy(S)
-  R1 = similar(S) 
+  R1 = similar(S)
   for k = 1:n
     E0 = exp(-R10[k] * TR)
     A[:,k] = A[:,k] / S0[k] # normalize by pre-contrast signal

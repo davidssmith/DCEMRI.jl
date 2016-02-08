@@ -17,20 +17,23 @@ function r1eff{M,N}(S::Array{Float64,M}, R10::Array{Float64,N}, TR::Float64, fli
   @dprint "converting DCE signal to effective R1"
   @assert 0.0 < flip "flip angle must be positive"
   @assert 0.0 < TR && TR < 1.0 "TR must be in units of ms"
-  S0 = squeeze(mean(S[1:2,:,:],1),1)
-  nt, nx, ny = size(S)
+  dims = size(S)
+  nt = dims[1]
+  n = prod(dims[2:end])
+  S = reshape(S, (nt, n))
+  S0 = mean(S[1:2,:],1)
   A = copy(S)
-  R1 = similar(S)
-  for x in 1:nx, y in 1:ny
-    E0 = exp(-R10[x,y] * TR)
-    A[:,x,y] = A[:,x,y] / S0[x,y] # normalize by pre-contrast signal
+  R1 = similar(S) 
+  for k = 1:n
+    E0 = exp(-R10[k] * TR)
+    A[:,k] = A[:,k] / S0[k] # normalize by pre-contrast signal
     for t in 1:nt
-      E = (1.0 - A[t,x,y] + A[t,x,y]*E0 - E0*cos(flip)) /
-        (1.0 - A[t,x,y]*cos(flip) + A[t,x,y]*E0.*cos(flip) - E0*cos(flip))
-      R1[t,x,y] = E > 0.0 ? (-1.0 / TR) * log(E) : 0.0
+      E = (1.0 - A[t,k] + A[t,k]*E0 - E0*cos(flip)) /
+        (1.0 - A[t,k]*cos(flip) + A[t,k]*E0.*cos(flip) - E0*cos(flip))
+      R1[t,k] = E > 0.0 ? (-1.0 / TR) * log(E) : 0.0
     end
   end
-  R1
+  reshape(R1, (nt, dims[2:end]))
 end
 
 function tissueconc{M,N}(R1::Array{Float64,M}, R10::Array{Float64,N}, r1::Float64)

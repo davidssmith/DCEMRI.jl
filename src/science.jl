@@ -13,7 +13,7 @@ function ser{N}(x::Array{Float64,N}, thresh::Float64=0.01)
   reshape(SER, dims[2:end])
 end
 
-function r1eff(S::Array{Float64,3}, R10::Matrix{Float64}, TR::Float64, flip::Float64)
+function r1eff{M,N}(S::Array{Float64,M}, R10::Matrix{Float64,N}, TR::Float64, flip::Float64)
   @dprint "converting DCE signal to effective R1"
   @assert 0.0 < flip "flip angle must be positive"
   @assert 0.0 < TR && TR < 1.0 "TR must be in units of ms"
@@ -50,14 +50,14 @@ function fitr1(x, flip_angles::Vector{Float64}, TR::Float64,
                resid_thresh::Float64=0.01)
   @dprint "fitting R1 relaxation rate to multi-flip data"
   sizein = size(x)
-  n = prod(sizein[2:end])
-  nangles = sizein[1]
+  n = prod(sizein[1:end-1])
+  nangles = sizein[end]
   @assert nangles == length(flip_angles)
   x = reshape(x, (nangles, n))
   p0 = [maximum(x), 1.0]
   model(x,p) = spgreqn(x, p, TR)
   idxs = find(mean(x, 1) .> 0.1*maximum(x))
-  params, resid = nlsfit(model, x, idxs, flip_angles, p0)
+  params, resid = nlsfit(model, x, idxs, flip_angles, p0) # GIVES ERROR
   S0 = reshape(params[1,:], sizein[2:end])
   R10 = reshape(params[2,:], sizein[2:end])
   (R10, S0, resid)

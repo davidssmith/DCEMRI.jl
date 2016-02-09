@@ -184,9 +184,8 @@ function fitdata(opts::Dict)
   dceflip = opts["DCEflip"] * pi / 180.0
   t = vec(opts["t"]) / 60.0  # convert time to min
 
-  nt, nx, ny = size(dcedata)
-  @assert nx == size(R10,1) "R10 map and DCE images have different numbers of rows"
-  @assert ny == size(R10,2) "R10 map and DCE images have different numbers of columns"
+  dims = size(dcedata)[2:end]
+  @assert dims == size(R10) "R10 map and DCE images have different dimensions"
 
   # MAIN: run postprocessing steps
   SER = ser(dcedata)
@@ -211,9 +210,9 @@ function fitdata(opts::Dict)
   results["modelmap"] = modelmap
   results["R1"] = R1
   results["Ct"] = Ct
-  results["Kt"] = squeeze(params[1,:,:], 1)
-  results["ve"] = squeeze(params[2,:,:], 1)
-  results["vp"] = squeeze(params[3,:,:], 1)
+  results["Kt"] = reshape(params[1,:], dims)
+  results["ve"] = reshape(params[2,:], dims)
+  results["vp"] = reshape(params[3,:], dims)
   results["resid"] = resid
   matwrite(outfile, results)
 

@@ -191,7 +191,7 @@ function fitdata(opts::Dict)
   # MAIN: run postprocessing steps
   SER = ser(dcedata)
   if haskey(opts, "mask") # if mask specified, use it
-      mask = convert(BitArray{2}, opts["mask"])
+      mask = bitpack(opts["mask"])
   else   # use SER threshold
       mask = SER .> opts["SERcutoff"]
   end
@@ -206,7 +206,7 @@ function fitdata(opts::Dict)
   results["R10"] = R10
   results["S0"] = S0
   results["SER"] = SER
-  results["mask"] = convert(Array{Bool,2}, mask)
+  results["mask"] = bitunpack(mask)
   results["models"] = models
   results["modelmap"] = modelmap
   results["R1"] = R1

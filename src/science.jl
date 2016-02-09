@@ -67,7 +67,7 @@ function fitr1(x, flip_angles::Vector{Float64}, TR::Float64,
 end
 
 
-function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitMatrix{N}, t::Vector{Float64},
+function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64},
                    Cp::Vector{Float64}; models=[2], residthresh=1.0, Ktmax=5.0)
   @dprint "fitting DCE data"
   sizein = size(Ct)

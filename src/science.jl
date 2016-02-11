@@ -13,24 +13,27 @@ function ser{N}(x::Array{Float64,N}, thresh::Float64=0.01)
   reshape(SER, dims[2:end])
 end
 
-function r1eff(S::Array{Float64,3}, R10::Matrix{Float64}, TR::Float64, flip::Float64)
+function r1eff{M,N}(S::Array{Float64,M}, R10::Array{Float64,N}, TR::Float64, flip::Float64)
   @dprint "converting DCE signal to effective R1"
   @assert 0.0 < flip "flip angle must be positive"
   @assert 0.0 < TR && TR < 1.0 "TR must be in units of ms"
-  S0 = squeeze(mean(S[1:2,:,:],1),1)
-  nt, nx, ny = size(S)
+  dims = size(S)
+  nt = dims[1]
+  n = prod(dims[2:end])
+  S = reshape(S, (nt, n))
+  S0 = mean(S[1:2,:],1)
   A = copy(S)
   R1 = similar(S)
-  for x in 1:nx, y in 1:ny
-    E0 = exp(-R10[x,y] * TR)
-    A[:,x,y] = A[:,x,y] / S0[x,y] # normalize by pre-contrast signal
+  for k = 1:n
+    E0 = exp(-R10[k] * TR)
+    A[:,k] = A[:,k] / S0[k] # normalize by pre-contrast signal
     for t in 1:nt
-      E = (1.0 - A[t,x,y] + A[t,x,y]*E0 - E0*cos(flip)) /
-        (1.0 - A[t,x,y]*cos(flip) + A[t,x,y]*E0.*cos(flip) - E0*cos(flip))
-      R1[t,x,y] = E > 0.0 ? (-1.0 / TR) * log(E) : 0.0
+      E = (1.0 - A[t,k] + A[t,k]*E0 - E0*cos(flip)) /
+        (1.0 - A[t,k]*cos(flip) + A[t,k]*E0.*cos(flip) - E0*cos(flip))
+      R1[t,k] = E > 0.0 ? (-1.0 / TR) * log(E) : 0.0
     end
   end
-  R1
+  reshape(R1, dims)
 end
 
 function tissueconc{M,N}(R1::Array{Float64,M}, R10::Array{Float64,N}, r1::Float64)
@@ -64,7 +67,7 @@ function fitr1(x, flip_angles::Vector{Float64}, TR::Float64,
 end
 
 
-function fitdce{N}(Ct::Array{Float64,N}, mask::BitMatrix, t::Vector{Float64},
+function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64},
                    Cp::Vector{Float64}; models=[2], residthresh=1.0, Ktmax=5.0)
   @dprint "fitting DCE data"
   sizein = size(Ct)
@@ -181,14 +184,13 @@ function fitdata(opts::Dict)
   dceflip = opts["DCEflip"] * pi / 180.0
   t = vec(opts["t"]) / 60.0  # convert time to min
 
-  nt, nx, ny = size(dcedata)
-  @assert nx == size(R10,1) "R10 map and DCE images have different numbers of rows"
-  @assert ny == size(R10,2) "R10 map and DCE images have different numbers of columns"
+  dims = size(dcedata)[2:end]
+  @assert dims == size(R10) "R10 map and DCE images have different dimensions"
 
   # MAIN: run postprocessing steps
   SER = ser(dcedata)
   if haskey(opts, "mask") # if mask specified, use it
-      mask = convert(BitArray{2}, opts["mask"])
+      mask = bitpack(opts["mask"])
   else   # use SER threshold
       mask = SER .> opts["SERcutoff"]
   end
@@ -203,14 +205,14 @@ function fitdata(opts::Dict)
   results["R10"] = R10
   results["S0"] = S0
   results["SER"] = SER
-  results["mask"] = convert(Array{Bool,2}, mask)
+  results["mask"] = bitunpack(mask)
   results["models"] = models
   results["modelmap"] = modelmap
   results["R1"] = R1
   results["Ct"] = Ct
-  results["Kt"] = squeeze(params[1,:,:], 1)
-  results["ve"] = squeeze(params[2,:,:], 1)
-  results["vp"] = squeeze(params[3,:,:], 1)
+  results["Kt"] = reshape(params[1,:], dims)
+  results["ve"] = reshape(params[2,:], dims)
+  results["vp"] = reshape(params[3,:], dims)
   results["resid"] = resid
   matwrite(outfile, results)
 

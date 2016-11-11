@@ -41,7 +41,7 @@ function levenberg_marquardt(f::Function, g::Function, x0::Vector{Float64}; tolX
 		# Where we have used the equivalence: diagm(J'*J) = diagm(sum(J.^2, 1))
 		# It is additionally useful to bound the elements of DtD below to help
 		# prevent "parameter evaporation".
-		DtD = diagm(Float64[max(x, MIN_DIAGONAL) for x in sum(J.^2,1)])
+		DtD = diagm(vec(Float64[max(x, MIN_DIAGONAL) for x in sum(J.^2,1)]))
 		delta_x = ( J'*J + sqrt(lambda)*DtD ) \ -J'*fcur
 
 		# if the linear assumption is valid, our new residual should be:

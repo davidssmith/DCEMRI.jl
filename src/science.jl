@@ -165,8 +165,8 @@ function fitdata(opts::Dict)
   # parallel workers are better than multithreaded BLAS for this problem
   # run julia with the '-p <n>' flag to start with n workers
   blas_set_num_threads(1)
-  startworkers(opts["workers"])
-  require("DCEMRI.jl")
+  # startworkers(opts["workers"])
+  # require("DCEMRI.jl")
 
   if haskey(opts, "R10") && haskey(opts, "S0")
     @dprint "found existing R1 map"

@@ -104,7 +104,7 @@ end
 
 # converts keyword argument to a dictionary
 function kwargs2dict(kwargs)
-    d = Dict{ASCIIString,Any}()
+    d = Dict{String,Any}()
     for (k, v) in kwargs
         d[string(k)] = v
     end

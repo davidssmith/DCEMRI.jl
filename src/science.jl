@@ -164,9 +164,9 @@ function fitdata(opts::Dict)
 
   # parallel workers are better than multithreaded BLAS for this problem
   # run julia with the '-p <n>' flag to start with n workers
-  blas_set_num_threads(1)
-  startworkers(opts["workers"])
-  require("DCEMRI.jl")
+  BLAS.set_num_threads(1)
+  # startworkers(opts["workers"])
+  # require("DCEMRI.jl")
 
   if haskey(opts, "R10") && haskey(opts, "S0")
     @dprint "found existing R1 map"
@@ -190,7 +190,7 @@ function fitdata(opts::Dict)
   # MAIN: run postprocessing steps
   SER = ser(dcedata)
   if haskey(opts, "mask") # if mask specified, use it
-      mask = bitpack(opts["mask"])
+      mask = BitArray(opts["mask"])
   else   # use SER threshold
       mask = SER .> opts["SERcutoff"]
   end
@@ -205,7 +205,7 @@ function fitdata(opts::Dict)
   results["R10"] = R10
   results["S0"] = S0
   results["SER"] = SER
-  results["mask"] = bitunpack(mask)
+  results["mask"] = Array(mask)
   results["models"] = models
   results["modelmap"] = modelmap
   results["R1"] = R1

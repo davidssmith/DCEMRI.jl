@@ -39,14 +39,17 @@ end
 function tissueconc{M,N}(R1::Array{Float64,M}, R10::Array{Float64,N}, r1::Float64)
   @dprint "converting effective R1 to tracer tissue concentration Ct"
   @assert r1 > 0.0
-  nt = size(R1,1)
+  dims = size(R1)
+  nt = dims[1]
   xidxs = find(R10)
-  R1 = reshape(R1, Val{2})
+  n = prod(dims[2:end])
+  R1 = reshape(R1, (nt, n))
   Ct = similar(R1)
   for x in xidxs, t in 1:nt
     Ct[t,x] = R1[t,x] > 0.0 ? (R1[t,x] - R10[x]) / r1 : 0.0
   end
-  Ct
+  R1 = reshape(R1, dims)
+  reshape(Ct, dims)
 end
 
 
@@ -211,6 +214,7 @@ function fitdata(opts::Dict)
   results["modelmap"] = modelmap
   results["R1"] = R1
   results["Ct"] = Ct
+  params = reshape(params, (size(params,1), prod(dims)))
   results["Kt"] = reshape(params[1,:], dims)
   results["ve"] = reshape(params[2,:], dims)
   results["vp"] = reshape(params[3,:], dims)

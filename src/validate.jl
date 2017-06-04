@@ -25,7 +25,7 @@ function makeplots6(mat::Dict, outdir::AbstractString; dx=1)
   clf()
   plot(mat["t"], mat["Cp"], "ko-")
   xlabel("time (min)")
-  yticks([0:2:10])
+  # yticks([0:2:10]) # This produces an error
   ylim(0,10)
   ylabel("[Gd-DTPA] (mM)")
   title("arterial input function, \$C_p\$")

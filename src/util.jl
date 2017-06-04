@@ -1,5 +1,5 @@
-macro dprint(s)
-    :(verbose && println($s))
+macro dprint(str)
+    :(verbose && println($(esc(str))))
 end
 
 function parsefromargs()

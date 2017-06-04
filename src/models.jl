@@ -13,15 +13,15 @@ function expConv(A::Vector{Float64}, B::Float64, t::Vector{Float64})
   n = length(t)
   x = B * ( t[2:n] - t[1:n-1] )
   dA = ( A[2:n] - A[1:n-1] ) ./ x
-  E = exp(-x)
+  E = exp.(-x)
   E0 = 1 - E
   E1 = x - E0
-  iterAdd = A[1:n-1] .* E0 + dA .* E1;
-  f = zeros(n);
+  iterAdd = A[1:n-1] .* E0 + dA .* E1
+  f = zeros(n)
   for i in 1:n-1
-     f[i+1] = E[i]*f[i] + iterAdd[i];
+     f[i+1] = E[i]*f[i] + iterAdd[i]
   end
-  f = f / B;
+  f = f / B
 end
 
 function toftskety(t::Vector{Float64}, p::Vector{Float64}, Cp::Vector{Float64})

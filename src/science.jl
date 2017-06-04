@@ -39,13 +39,17 @@ end
 function tissueconc{M,N}(R1::Array{Float64,M}, R10::Array{Float64,N}, r1::Float64)
   @dprint "converting effective R1 to tracer tissue concentration Ct"
   @assert r1 > 0.0
-  Ct = similar(R1)
-  nt = size(R1,1)
+  dims = size(R1)
+  nt = dims[1]
   xidxs = find(R10)
+  n = prod(dims[2:end])
+  R1 = reshape(R1, (nt, n))
+  Ct = similar(R1)
   for x in xidxs, t in 1:nt
     Ct[t,x] = R1[t,x] > 0.0 ? (R1[t,x] - R10[x]) / r1 : 0.0
   end
-  Ct
+  R1 = reshape(R1, dims)
+  reshape(Ct, dims)
 end
 
 
@@ -90,7 +94,7 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
     f3(x,p) = extendedtoftskety(x, p, Cp)
     p, r, dof = nlsfit(f3, Ct, idxs, t, p0)
     p[2,idxs] = p[1,idxs] ./ p[2,idxs]
-    resid[:] = squeeze(sumabs2(r, 1), 1) / dof
+    resid[:] = squeeze(sum(abs2, r, 1), 1) / dof
     params[:] = p
     modelmap[idxs] = 3
   end
@@ -99,7 +103,7 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
     p0 = [0.01, 0.01]
     f2(x,p) = toftskety(x, p, Cp)
     p, r, dof = nlsfit(f2, Ct, idxs, t, p0)
-    r = squeeze(sumabs2(r, 1), 1) / dof
+    r = squeeze(sum(abs2, r, 1), 1) / dof
     for k in idxs
       if r[k] <= resid[k]
         resid[k] = r[k]
@@ -127,8 +131,8 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
   end
   for k in idxs
     if resid[k] <= residthresh
-      params[1,k] = clamp(params[1,k], eps(), Ktmax)
-      params[2:end,k] =  clamp(params[2:end,k], eps(), 1.0)
+      params[1,k] = clamp.(params[1,k], eps(), Ktmax)
+      params[2:end,k] =  clamp.(params[2:end,k], eps(), 1.0)
     else
       params[:,k] = 0.0
       mask[k] = false
@@ -210,6 +214,7 @@ function fitdata(opts::Dict)
   results["modelmap"] = modelmap
   results["R1"] = R1
   results["Ct"] = Ct
+  params = reshape(params, (size(params,1), prod(dims)))
   results["Kt"] = reshape(params[1,:], dims)
   results["ve"] = reshape(params[2,:], dims)
   results["vp"] = reshape(params[3,:], dims)

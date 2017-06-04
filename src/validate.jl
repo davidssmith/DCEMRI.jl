@@ -25,7 +25,7 @@ function makeplots6(mat::Dict, outdir::AbstractString; dx=1)
   clf()
   plot(mat["t"], mat["Cp"], "ko-")
   xlabel("time (min)")
-  yticks([0:2:10])
+  # yticks([0:2:10]) # This produces an error
   ylim(0,10)
   ylabel("[Gd-DTPA] (mM)")
   title("arterial input function, \$C_p\$")
@@ -131,8 +131,8 @@ function makeplots4(mat::Dict, outdir::AbstractString; dx=1)
   back = (S0map - minimum(S0map)) / (maximum(S0map) - minimum(S0map))
   mask = convert(Array{Bool,2}, mat["mask"])
 
-  ytpos = [(div(10,dx)+floor(Integer, 5/dx)):div(30,dx):(div(180,dx)-1)]
-  xtpos = [(0+floor(Integer, 5/dx)):div(10,dx):(div(50,dx)-1)]
+  ytpos = collect((div(10,dx)+floor(Integer, 5/dx)):div(30,dx):(div(180,dx)-1))
+  xtpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(50,dx)-1))
   ytlabels = [string(x) for x in [0.001, 0.005, 0.01, 0.02, 0.05, 0.1]]
   xtlabels = [string(x) for x in [0.01,0.02,0.05,0.1,0.2]]
 

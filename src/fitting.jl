@@ -188,3 +188,28 @@ function nlsfit{T}(f::Function, y::Matrix{T}, idxs::Vector{Int}, x::Vector{T},
   @dprint @sprintf "processed %d voxels in %.1f s (%.1f vox/s)\n" nidxs t vps
   (params, resids, dof)
 end
+
+function cumtrapz(x::Array{Float64, 1}, y::Array{Float64}, dim::Integer=1)
+    # Cumulative trapezoidal integration
+    # Obtained from:
+    # https://github.com/jdtuck/ElasticFDA.jl/blob/master/src/misc_funcs.jl
+    perm = [dim:max(length(size(y)),dim); 1:dim-1];
+    y = permutedims(y, perm);
+    if ndims(y) == 1
+        n = 1;
+        m = length(y);
+    else
+        m, n = size(y);
+    end
+
+    if n == 1
+        dt = diff(x)/2.0;
+        z = [0; cumsum(dt.*(y[1:(m-1)] + y[2:m]))];
+    else
+        dt = repmat(diff(x)/2.0,1,n);
+        z = [zeros(1,n); cumsum(dt.*(y[1:(m-1), :] + y[2:m, :]),1)];
+        z = ipermutedims(z, perm);
+    end
+
+    return z
+end

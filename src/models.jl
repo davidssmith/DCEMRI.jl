@@ -64,3 +64,40 @@ function onecompartment(t::Vector{Float64}, p::Vector{Float64}, Cp::Vector{Float
   end
   Ct
 end
+
+function fitTM(t::Vector{Float64}, Ct::Matrix{Float64}, Cp::Vector{Float64})
+  (sT,sX) = size(Ct)
+  pkParams = zeros(2,sX)
+  resid = zeros(sT,sX)
+
+  M = zeros(sT,2)
+  M[:,1] = cumtrapz(t,Cp)
+
+  for i in 1:sX
+      M[:,2] = -cumtrapz(t,Ct[:,i])
+      pkParams[:,i] = M\Ct[:,i]
+      resid[:,i] = (M*pkParams[:,i]-Ct[:,i]) / sqrt(norm(Ct[:,i]))
+  end
+  r = squeeze(sum(abs2,resid,1),1) / (sT-2)
+  (pkParams, r)
+end
+
+function fitETM(t::Vector{Float64}, Ct::Matrix{Float64}, Cp::Vector{Float64})
+  (sT,sX) = size(Ct)
+  pkParams = zeros(3,sX)
+  resid = zeros(sT,sX)
+
+  trapzCp = cumtrapz(t,Cp)
+  M = zeros(sT,3)
+  M[:,1] = trapzCp
+  M[:,3] = Cp
+
+  for i in 1:sX
+      M[:,2] = -cumtrapz(t,Ct[:,i])
+      pkParams[:,i] = M\Ct[:,i]
+      resid[:,i] = (M*pkParams[:,i]-Ct[:,i]) / sqrt(norm(Ct[:,i]))
+  end
+  pkParams[1,:] = pkParams[1,:] - pkParams[2,:] .* pkParams[3,:]
+  r = squeeze(sum(abs2,resid,1),1) / (sT-3)
+  (pkParams, r)
+end

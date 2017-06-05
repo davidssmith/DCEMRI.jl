@@ -33,14 +33,17 @@ function levenberg_marquardt{T}( f::Function, g::Function, initial_x::AbstractVe
 	const MIN_LAMBDA = 1e-16 # maximum trust region radius
 	const MIN_DIAGONAL = 1e-6 # lower bound on values of diagonal matrix used to regularize the trust region step
 	converged = false
+    x_converged = false
+    g_converged = false
+    need_jacobian = true
 	iterCt = 0
-	x = initial_x
+	x = copy(initial_x)
 	delta_x = copy(initial_x)
 	f_calls = 0
 	g_calls = 0
 	fcur = f(x)
 	f_calls += 1
-	residual = norm(fcur)^2
+	residual = sum(abs2, fcur)
 
     # Create buffers
     n = length(x)
@@ -48,8 +51,11 @@ function levenberg_marquardt{T}( f::Function, g::Function, initial_x::AbstractVe
     n_buffer = Vector{T}(n)
 
 	while ~converged && iterCt < maxIter
-		J = g(x)
-		g_calls += 1
+        if need_jacobian
+            J = g(x)
+            g_calls += 1
+            need_jacobian = false
+        end
 		# we want to solve:
 		#    argmin 0.5*||J(x)*delta_x + f(x)||^2 + lambda*||diagm(J'*J)*delta_x||^2
 		# Solving for the minimum gives:
@@ -61,15 +67,15 @@ function levenberg_marquardt{T}( f::Function, g::Function, initial_x::AbstractVe
 		# REPLACED: DtD = diagm(vec(Float64[max(x, MIN_DIAGONAL) for x in sum(J.^2,1)]))
         DtD = vec(sum(abs2, J, 1))
         for i in 1:length(DtD)
-          if DtD[i] <= MIN_DIAGONAL
-            DtD[i] = MIN_DIAGONAL
-          end
+            if DtD[i] <= MIN_DIAGONAL
+                DtD[i] = MIN_DIAGONAL
+            end
         end
 
 		# REPLACED: delta_x = ( J'*J + sqrt(lambda)*DtD ) \ -J'*fcur
         At_mul_B!(JJ, J, J)
         @simd for i in 1:n
-          @inbounds JJ[i, i] += lambda * DtD[i]
+            @inbounds JJ[i, i] += lambda * DtD[i]
         end
         At_mul_B!(n_buffer, J, fcur)
         scale!(n_buffer, -1)
@@ -77,9 +83,9 @@ function levenberg_marquardt{T}( f::Function, g::Function, initial_x::AbstractVe
 
         # apply box constraints
         if !isempty(lower)
-          @simd for i in 1:n
-            @inbounds delta_x[i] = max(x[i] + delta_x[i], lower[i]) - x[i]
-          end
+            @simd for i in 1:n
+              @inbounds delta_x[i] = max(x[i] + delta_x[i], lower[i]) - x[i]
+            end
         end
         if !isempty(upper)
             @simd for i in 1:n
@@ -98,33 +104,43 @@ function levenberg_marquardt{T}( f::Function, g::Function, initial_x::AbstractVe
                              $predicted_residual (predicted_residual) >
                              $residual (residual) + $(eps(predicted_residual)) (eps)""")
 		end
-		# try the step and compute its quality
-		trial_f = f(x + delta_x)
-		f_calls += 1
-		trial_residual = norm(trial_f)^2
-		# step quality = residual change / predicted residual change
-		rho = (trial_residual - residual) / (predicted_residual - residual)
-		if rho > min_step_quality
-			x += delta_x
-			fcur = trial_f
-			residual = trial_residual
-			# increase trust region radius
-			lambda = max(0.1*lambda, MIN_LAMBDA)
-		else
-			# decrease trust region radius
-			lambda = min(10*lambda, MAX_LAMBDA)
-		end
-		iterCt += 1
+
+        # try the step and compute its quality
+        trial_f = f(x + delta_x)
+        f_calls += 1
+        trial_residual = sum(abs2, trial_f)
+        # step quality = residual change / predicted residual change
+        rho = (trial_residual - residual) / (predicted_residual - residual)
+        if rho > min_step_quality
+            x += delta_x
+            fcur = trial_f
+            residual = trial_residual
+            if rho > good_step_quality
+                # increase trust region radius
+                lambda = max(lambda_decrease*lambda, MIN_LAMBDA)
+            end
+            need_jacobian = true
+        else
+            # decrease trust region radius
+            lambda = min(lambda_increase*lambda, MAX_LAMBDA)
+        end
+        iterCt += 1
+
 		# check convergence criteria:
 		# 1. Small gradient: norm(J^T * fcur, Inf) < tolG
 		# 2. Small step size: norm(delta_x) < tolX
-		converged = (norm(J' * fcur, Inf) < tolG) || (norm(delta_x) < tolX*(tolX + norm(x)))
+		# REPLACED: converged = (norm(J' * fcur, Inf) < tolG) || (norm(delta_x) < tolX*(tolX + norm(x)))
+        if norm(J' * fcur, Inf) < tolG
+            g_converged = true
+        elseif norm(delta_x) < tolX*(tolX + norm(x))
+            x_converged = true
+        end
+        converged = g_converged | x_converged
 	end
-	x
+	return x
 end
 
-function nlsfitworker{T}(model::Function, y::Matrix{T}, x::Vector{T},
-  p0::Vector{T}, plower::Vector{T}=Array{T}(0), pupper::Vector{T}=Array{T}(0))
+function nlsfitworker{T}(model::Function, y::Matrix{T}, x::Vector{T}, p0::Vector{T}; kwargs...)
   # performs Levenberg-Marquardt fitting
   nparams = length(p0)
   n = size(y,2)
@@ -133,8 +149,7 @@ function nlsfitworker{T}(model::Function, y::Matrix{T}, x::Vector{T},
   for j in 1:n
     f(p) = model(x, p) - y[:,j]
     g = Calculus.jacobian(f, :forward)
-    results = levenberg_marquardt(f, g, p0; tolX=1e-3, tolG=1e-4,
-                 lambda=10.0, upper=pupper, lower=plower)
+    results = levenberg_marquardt(f, g, p0; tolX=1e-3, tolG=1e-4, lambda=10.0, kwargs...)
     resids[:,j] = f(results) / sqrt(norm(y[:,j]))
     params[:,j] = results
   end
@@ -142,7 +157,7 @@ function nlsfitworker{T}(model::Function, y::Matrix{T}, x::Vector{T},
 end
 
 function nlsfit{T}(f::Function, y::Matrix{T}, idxs::Vector{Int}, x::Vector{T},
-  p0::Vector{T}; plower::Vector{T}=Array{T}(0), pupper::Vector{T}=Array{T}(0))
+  p0::Vector{T}; kwargs...)
   tic()
   nt, n = size(y)
   nw = nworkers()
@@ -158,7 +173,7 @@ function nlsfit{T}(f::Function, y::Matrix{T}, idxs::Vector{Int}, x::Vector{T},
     @dprint "work distribution: $nt x $ni points"
     workerids = workers()
     for w in 1:nw
-      r = @spawnat workerids[w] nlsfitworker(f, y[:,workeridxs[w]], x, p0, plower, pupper)
+      r = @spawnat workerids[w] nlsfitworker(f, y[:,workeridxs[w]], x, p0; kwargs...)
       push!(reflist, r)
     end
     for w in 1:nw
@@ -166,7 +181,7 @@ function nlsfit{T}(f::Function, y::Matrix{T}, idxs::Vector{Int}, x::Vector{T},
     end
   else   # run on one CPU core
     @dprint "running $nt x $nidxs points on one CPU core"
-    params[:,idxs], resids[:,idxs] = nlsfitworker(f, y[:,idxs], x, p0, plower, pupper)
+    params[:,idxs], resids[:,idxs] = nlsfitworker(f, y[:,idxs], x, p0; kwargs...)
   end
   t = toq()
   vps = nidxs / t

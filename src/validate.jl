@@ -22,12 +22,12 @@ function analyze6(mat::Dict, outdir::AbstractString; dx=1, makeplots=true)
 
   Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
   ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
-  print_with_color(:green, "Kt\n\tRMSE:\t", sqrt(norm(Kt_error)^2 / length(Kt_error)), " %\n")
-  print_with_color(:green, "\terrmax:\t", maximum(abs.(Kt_error)),"\n")
-  print_with_color(:green, "\tCCC:\t", ccc(Kt_truth, Kt),"\n")
-  print_with_color(:green, "ve\n\tRMSE:\t", sqrt(norm(ve_error)^2 / length(ve_error))," %\n")
-  print_with_color(:green, "\terrmax:\t", maximum(abs.(ve_error)),"\n")
-  print_with_color(:green, "\tCCC:\t", ccc(ve_truth, ve),"\n")
+  print_with_color(:green, "Kt\n\tRMSE:\t$(sqrt(norm(Kt_error)^2 / length(Kt_error))) %\n")
+  print_with_color(:green, "\terrmax:\t$(maximum(abs.(Kt_error)))\n")
+  print_with_color(:green, "\tCCC:\t$(ccc(Kt_truth, Kt))\n")
+  print_with_color(:green, "ve\n\tRMSE:\t$(sqrt(norm(ve_error)^2 / length(ve_error))) %\n")
+  print_with_color(:green, "\terrmax:\t$(maximum(abs.(ve_error)))\n")
+  print_with_color(:green, "\tCCC:\t$(ccc(ve_truth, ve))\n")
 
   if !makeplots
     return
@@ -38,6 +38,7 @@ function analyze6(mat::Dict, outdir::AbstractString; dx=1, makeplots=true)
   ytlabels = [string(x) for x in [0.01,0.02,0.05,0.1,0.2,0.35]]
   xtlabels = [string(x) for x in [0.01,0.05,0.1,0.2,0.5]]
 
+  println("Plotting results ...")
   # AIF
   figure(figsize=(4.5,4.5))
   clf()
@@ -149,15 +150,15 @@ function analyze4(mat::Dict, outdir::AbstractString; dx=1, makeplots=true)
   Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
   ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
   vp_error = clamp.(100.0*(vp - vp_truth) ./ (vp_truth + eps()), -100.0, 100.0)
-  print_with_color(:green, "Kt\n\tRMSE:\t", sqrt(norm(Kt_error)^2 / length(Kt_error))," %\n")
-  print_with_color(:green, "\terrmax:\t", maximum(abs.(Kt_error))," %\n")
-  print_with_color(:green, "\tCCC:\t", ccc(Kt_truth, Kt),"\n")
-  print_with_color(:green, "ve\n\tRMSE:\t", sqrt(norm(ve_error)^2 / length(ve_error))," %\n")
-  print_with_color(:green, "\terrmax:\t", maximum(abs.(ve_error))," %\n")
-  print_with_color(:green, "\tCCC:\t", ccc(ve_truth, ve),"\n")
-  print_with_color(:green, "vp\n\tRMSE:\t", sqrt(norm(vp_error)^2 / length(vp_error))," %\n")
-  print_with_color(:green, "\terrmax:\t", maximum(abs.(vp_error))," %\n")
-  print_with_color(:green, "\tCCC:\t", ccc(vp_truth, vp),"\n")
+  print_with_color(:green, "Kt\n\tRMSE:\t$(sqrt(norm(Kt_error)^2 / length(Kt_error))) %\n")
+  print_with_color(:green, "\terrmax:\t$(maximum(abs.(Kt_error))) %\n")
+  print_with_color(:green, "\tCCC:\t$(ccc(Kt_truth, Kt))\n")
+  print_with_color(:green, "ve\n\tRMSE:\t$(sqrt(norm(ve_error)^2 / length(ve_error))) %\n")
+  print_with_color(:green, "\terrmax:\t$(maximum(abs.(ve_error))) %\n")
+  print_with_color(:green, "\tCCC:\t$(ccc(ve_truth, ve))\n")
+  print_with_color(:green, "vp\n\tRMSE:\t$(sqrt(norm(vp_error)^2 / length(vp_error))) %\n")
+  print_with_color(:green, "\terrmax:\t$(maximum(abs.(vp_error))) %\n")
+  print_with_color(:green, "\tCCC:\t$(ccc(vp_truth, vp))\n")
 
   if !makeplots
     return
@@ -168,6 +169,7 @@ function analyze4(mat::Dict, outdir::AbstractString; dx=1, makeplots=true)
   ytlabels = [string(x) for x in [0.001, 0.005, 0.01, 0.02, 0.05, 0.1]]
   xtlabels = [string(x) for x in [0.01,0.02,0.05,0.1,0.2]]
 
+  println("Plotting results ...")
   # AIF
   figure(figsize=(4,4))
   clf()
@@ -288,7 +290,6 @@ function validate(n, outdir::AbstractString; kwargs...)
   println("Running analysis of noise-free QIBA v$n data ...")
   isdir("$outdir/results") || mkdir("$outdir/results")
   results = fitdata(datafile="qiba$n.mat",outfile="$outdir/results/results.mat")
-  println("Plotting results ...")
   analyze(n, results, "$outdir/results", dx=10; kwargs...)
 
   println("Running analysis of noisy QIBA v$n data ...")
@@ -296,7 +297,6 @@ function validate(n, outdir::AbstractString; kwargs...)
   results = fitdata(datafile="qiba$(n)noisy.mat",
                      outfile="$outdir/results_noisy/results.mat")
 
-  println("Plotting results ...")
   analyze(n, results, "$outdir/results_noisy"; kwargs...)
   println("Validation complete. Results can be found in $outdir.")
 end

@@ -91,8 +91,10 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
   if 3 in models
     @dprint "attempting Extended Tofts-Kety model"
     p0 = [0.01, 0.01, 0.01]
+    pl = [0.0, 0.0, 0.0]
+    pu = [5.0, 1.0, 1.0]
     f3(x,p) = extendedtoftskety(x, p, Cp)
-    p, r, dof = nlsfit(f3, Ct, idxs, t, p0)
+    p, r, dof = nlsfit(f3, Ct, idxs, t, p0, plower=pl, pupper=pu)
     p[2,idxs] = p[1,idxs] ./ p[2,idxs]
     resid[:] = squeeze(sum(abs2, r, 1), 1) / dof
     params[:] = p
@@ -101,8 +103,10 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
   if 2 in models
     @dprint "attempting Standard Tofts-Kety model"
     p0 = [0.01, 0.01]
+    pl = [0.0, 0.0]
+    pu = [5.0, 1.0]
     f2(x,p) = toftskety(x, p, Cp)
-    p, r, dof = nlsfit(f2, Ct, idxs, t, p0)
+    p, r, dof = nlsfit(f2, Ct, idxs, t, p0, plower=pl, pupper=pu)
     r = squeeze(sum(abs2, r, 1), 1) / dof
     for k in idxs
       if r[k] <= resid[k]
@@ -117,8 +121,10 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
   if 1 in models
     @dprint "attempting plasma-only model"
     p0 = [0.01]
+    pl = [0.0]
+    pu = [1.0]
     f1(x,p) = onecompartment(x, p, Cp)
-    p, r, dof = nlsfit(f1, Ct, idxs, t, p0)
+    p, r, dof = nlsfit(f1, Ct, idxs, t, p0, plower=pl, pupper=pu)
     r = squeeze(sumabs2(r, 1), 1) / dof
     for k in idxs
       if r[k] <= resid[k]

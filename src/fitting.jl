@@ -1,11 +1,14 @@
 
-function levenberg_marquardt{T}(f::Function, g::Function, x0::Vector{T}; tolX=1e-8, tolG=1e-12,
-                             maxIter=100, lambda=100.0, show_trace=false, quiet=false)
+function levenberg_marquardt{T}( f::Function, g::Function, initial_x::AbstractVector{T};
+    tolX::Real = 1e-8, tolG::Real = 1e-12, maxIter::Integer = 100,
+    lambda::Real = 10.0, lambda_increase::Real = 10., lambda_decrease::Real = 0.1,
+    min_step_quality::Real = 1e-3, good_step_quality::Real = 0.75,
+    show_trace::Bool = false, lower::Vector{T} = Array{T}(0), upper::Vector{T} = Array{T}(0))
 	# finds argmin sum(f(x).^2) using the Levenberg-Marquardt algorithm
 	#          x
 	# The function f should take an input vector of length n and return an output vector of length m
 	# The function g is the Jacobian of f, and should be an m x n matrix
-	# x0 is an initial guess for the solution
+	# initial_x is an initial guess for the solution
 	# fargs is a tuple of additional arguments to pass to f
 	# available options:
 	#   tolX - search tolerance in x
@@ -16,15 +19,23 @@ function levenberg_marquardt{T}(f::Function, g::Function, x0::Vector{T}; tolX=1e
 	# returns: x, J
 	#   x - least squares solution for x
 	#   J - estimate of the Jacobian of f at x
+    # check parameters
+    ((isempty(lower) || length(lower)==length(initial_x)) && (isempty(upper) || length(upper)==length(initial_x))) ||
+            throw(ArgumentError("Bounds must either be empty or of the same length as the number of parameters."))
+    ((isempty(lower) || all(initial_x .>= lower)) && (isempty(upper) || all(initial_x .<= upper))) ||
+            throw(ArgumentError("Initial guess must be within bounds."))
+    (0 <= min_step_quality < 1) || throw(ArgumentError(" 0 <= min_step_quality < 1 must hold."))
+    (0 < good_step_quality <= 1) || throw(ArgumentError(" 0 < good_step_quality <= 1 must hold."))
+    (min_step_quality < good_step_quality) || throw(ArgumentError("min_step_quality < good_step_quality must hold."))
+
 
 	const MAX_LAMBDA = 1e16 # minimum trust region radius
 	const MIN_LAMBDA = 1e-16 # maximum trust region radius
-	const MIN_STEP_QUALITY = 1e-3
 	const MIN_DIAGONAL = 1e-6 # lower bound on values of diagonal matrix used to regularize the trust region step
 	converged = false
 	iterCt = 0
-	x = x0
-	delta_x = copy(x0)
+	x = initial_x
+	delta_x = copy(initial_x)
 	f_calls = 0
 	g_calls = 0
 	fcur = f(x)
@@ -64,6 +75,18 @@ function levenberg_marquardt{T}(f::Function, g::Function, x0::Vector{T}; tolX=1e
         scale!(n_buffer, -1)
         delta_x = JJ \ n_buffer
 
+        # apply box constraints
+        if !isempty(lower)
+          @simd for i in 1:n
+            @inbounds delta_x[i] = max(x[i] + delta_x[i], lower[i]) - x[i]
+          end
+        end
+        if !isempty(upper)
+            @simd for i in 1:n
+               @inbounds delta_x[i] = min(x[i] + delta_x[i], upper[i]) - x[i]
+            end
+        end
+
 		# if the linear assumption is valid, our new residual should be:
 		# REPLACED: predicted_residual = norm(J*delta_x + fcur)^2
         predicted_residual = sum(abs2, J*delta_x + fcur)
@@ -81,7 +104,7 @@ function levenberg_marquardt{T}(f::Function, g::Function, x0::Vector{T}; tolX=1e
 		trial_residual = norm(trial_f)^2
 		# step quality = residual change / predicted residual change
 		rho = (trial_residual - residual) / (predicted_residual - residual)
-		if rho > MIN_STEP_QUALITY
+		if rho > min_step_quality
 			x += delta_x
 			fcur = trial_f
 			residual = trial_residual
@@ -100,8 +123,8 @@ function levenberg_marquardt{T}(f::Function, g::Function, x0::Vector{T}; tolX=1e
 	x
 end
 
-function nlsfitworker(model::Function, y::Matrix{Float64},
-                          x::Vector{Float64}, p0::Vector{Float64})
+function nlsfitworker{T}(model::Function, y::Matrix{T}, x::Vector{T},
+  p0::Vector{T}, plower::Vector{T}=Array{T}(0), pupper::Vector{T}=Array{T}(0))
   # performs Levenberg-Marquardt fitting
   nparams = length(p0)
   n = size(y,2)
@@ -111,15 +134,15 @@ function nlsfitworker(model::Function, y::Matrix{Float64},
     f(p) = model(x, p) - y[:,j]
     g = Calculus.jacobian(f, :forward)
     results = levenberg_marquardt(f, g, p0; tolX=1e-3, tolG=1e-4,
-                                        lambda=10.0)
+                 lambda=10.0, upper=pupper, lower=plower)
     resids[:,j] = f(results) / sqrt(norm(y[:,j]))
     params[:,j] = results
   end
   (params, resids)
 end
 
-function nlsfit(f::Function, y::Matrix{Float64}, idxs::Vector{Int},
-                x::Vector{Float64}, p0::Vector{Float64})
+function nlsfit{T}(f::Function, y::Matrix{T}, idxs::Vector{Int}, x::Vector{T},
+  p0::Vector{T}; plower::Vector{T}=Array{T}(0), pupper::Vector{T}=Array{T}(0))
   tic()
   nt, n = size(y)
   nw = nworkers()
@@ -135,7 +158,7 @@ function nlsfit(f::Function, y::Matrix{Float64}, idxs::Vector{Int},
     @dprint "work distribution: $nt x $ni points"
     workerids = workers()
     for w in 1:nw
-      r = @spawnat workerids[w] nlsfitworker(f, y[:,workeridxs[w]], x, p0)
+      r = @spawnat workerids[w] nlsfitworker(f, y[:,workeridxs[w]], x, p0, plower, pupper)
       push!(reflist, r)
     end
     for w in 1:nw
@@ -143,7 +166,7 @@ function nlsfit(f::Function, y::Matrix{Float64}, idxs::Vector{Int},
     end
   else   # run on one CPU core
     @dprint "running $nt x $nidxs points on one CPU core"
-    params[:,idxs], resids[:,idxs] = nlsfitworker(f, y[:,idxs], x, p0)
+    params[:,idxs], resids[:,idxs] = nlsfitworker(f, y[:,idxs], x, p0, plower, pupper)
   end
   t = toq()
   vps = nidxs / t

@@ -1,5 +1,5 @@
 
-function levenberg_marquardt(f::Function, g::Function, x0::Vector{Float64}; tolX=1e-8, tolG=1e-12,
+function levenberg_marquardt{T}(f::Function, g::Function, x0::Vector{T}; tolX=1e-8, tolG=1e-12,
                              maxIter=100, lambda=100.0, show_trace=false, quiet=false)
 	# finds argmin sum(f(x).^2) using the Levenberg-Marquardt algorithm
 	#          x
@@ -31,6 +31,11 @@ function levenberg_marquardt(f::Function, g::Function, x0::Vector{Float64}; tolX
 	f_calls += 1
 	residual = norm(fcur)^2
 
+    # Create buffers
+    n = length(x)
+    JJ = Matrix{T}(n, n)
+    n_buffer = Vector{T}(n)
+
 	while ~converged && iterCt < maxIter
 		J = g(x)
 		g_calls += 1
@@ -41,11 +46,28 @@ function levenberg_marquardt(f::Function, g::Function, x0::Vector{Float64}; tolX
 		# Where we have used the equivalence: diagm(J'*J) = diagm(sum(J.^2, 1))
 		# It is additionally useful to bound the elements of DtD below to help
 		# prevent "parameter evaporation".
-		DtD = diagm(vec(Float64[max(x, MIN_DIAGONAL) for x in sum(J.^2,1)]))
-		delta_x = ( J'*J + sqrt(lambda)*DtD ) \ -J'*fcur
+
+		# REPLACED: DtD = diagm(vec(Float64[max(x, MIN_DIAGONAL) for x in sum(J.^2,1)]))
+        DtD = vec(sum(abs2, J, 1))
+        for i in 1:length(DtD)
+          if DtD[i] <= MIN_DIAGONAL
+            DtD[i] = MIN_DIAGONAL
+          end
+        end
+
+		# REPLACED: delta_x = ( J'*J + sqrt(lambda)*DtD ) \ -J'*fcur
+        At_mul_B!(JJ, J, J)
+        @simd for i in 1:n
+          @inbounds JJ[i, i] += lambda * DtD[i]
+        end
+        At_mul_B!(n_buffer, J, fcur)
+        scale!(n_buffer, -1)
+        delta_x = JJ \ n_buffer
 
 		# if the linear assumption is valid, our new residual should be:
-		predicted_residual = norm(J*delta_x + fcur)^2
+		# REPLACED: predicted_residual = norm(J*delta_x + fcur)^2
+        predicted_residual = sum(abs2, J*delta_x + fcur)
+
 		# check for numerical problems in solving for delta_x by ensuring that the predicted residual is smaller
 		# than the current residual
 		if predicted_residual > residual + 2max(eps(predicted_residual),eps(residual))

@@ -1,6 +1,6 @@
 using PyPlot
 
-function makeplots6(mat::Dict, outdir::AbstractString; dx=1)
+function analyze6(mat::Dict, outdir::AbstractString; dx=1, plot=true)
 
   R1map = mat["R10"]
   S0map = mat["S0"]
@@ -22,13 +22,16 @@ function makeplots6(mat::Dict, outdir::AbstractString; dx=1)
 
   Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
   ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
-  print_with_color(:green, "Kt\n\tRMSE:\t", sqrt(norm(Kt_error)^2 / length(Kt_error)), "%\n")
+  print_with_color(:green, "Kt\n\tRMSE:\t", sqrt(norm(Kt_error)^2 / length(Kt_error)), " %\n")
   print_with_color(:green, "\terrmax:\t", maximum(abs.(Kt_error)),"\n")
   print_with_color(:green, "\tCCC:\t", ccc(Kt_truth, Kt),"\n")
-  print_with_color(:green, "ve\n\tRMSE:\t", sqrt(norm(ve_error)^2 / length(ve_error)),"%\n")
+  print_with_color(:green, "ve\n\tRMSE:\t", sqrt(norm(ve_error)^2 / length(ve_error))," %\n")
   print_with_color(:green, "\terrmax:\t", maximum(abs.(ve_error)),"\n")
   print_with_color(:green, "\tCCC:\t", ccc(ve_truth, ve),"\n")
 
+  if !plot
+    return
+  end
 
   ytpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(60,dx)-1))
   xtpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(50,dx)-1))
@@ -118,7 +121,7 @@ end
 
 
 
-function makeplots4(mat::Dict, outdir::AbstractString; dx=1)
+function analyze4(mat::Dict, outdir::AbstractString; dx=1, plot=true)
   R1map = mat["R10"]
   S0map = mat["S0"]
   modelmap = mat["modelmap"]
@@ -146,15 +149,19 @@ function makeplots4(mat::Dict, outdir::AbstractString; dx=1)
   Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
   ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
   vp_error = clamp.(100.0*(vp - vp_truth) ./ (vp_truth + eps()), -100.0, 100.0)
-  print_with_color(:green, "Kt\n\tRMSE:\t", sqrt(norm(Kt_error)^2 / length(Kt_error)),"%\n")
-  print_with_color(:green, "\terrmax:\t", maximum(abs.(Kt_error)),"%\n")
+  print_with_color(:green, "Kt\n\tRMSE:\t", sqrt(norm(Kt_error)^2 / length(Kt_error))," %\n")
+  print_with_color(:green, "\terrmax:\t", maximum(abs.(Kt_error))," %\n")
   print_with_color(:green, "\tCCC:\t", ccc(Kt_truth, Kt),"\n")
-  print_with_color(:green, "ve\n\tRMSE:\t", sqrt(norm(ve_error)^2 / length(ve_error)),"%\n")
-  print_with_color(:green, "\terrmax:\t", maximum(abs.(ve_error)),"%\n")
+  print_with_color(:green, "ve\n\tRMSE:\t", sqrt(norm(ve_error)^2 / length(ve_error))," %\n")
+  print_with_color(:green, "\terrmax:\t", maximum(abs.(ve_error))," %\n")
   print_with_color(:green, "\tCCC:\t", ccc(ve_truth, ve),"\n")
-  print_with_color(:green, "vp\n\tRMSE:\t", sqrt(norm(vp_error)^2 / length(vp_error)),"%\n")
-  print_with_color(:green, "\terrmax:\t", maximum(abs.(vp_error)),"%\n")
+  print_with_color(:green, "vp\n\tRMSE:\t", sqrt(norm(vp_error)^2 / length(vp_error))," %\n")
+  print_with_color(:green, "\terrmax:\t", maximum(abs.(vp_error))," %\n")
   print_with_color(:green, "\tCCC:\t", ccc(vp_truth, vp),"\n")
+
+  if !plot
+    return
+  end
 
   ytpos = collect((div(10,dx)+floor(Integer, 5/dx)):div(30,dx):(div(180,dx)-1))
   xtpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(50,dx)-1))
@@ -265,16 +272,16 @@ function makeplots4(mat::Dict, outdir::AbstractString; dx=1)
   savefig("$outdir/vp_error.pdf",bbox_inches="tight")
 end
 
-function makeplots(n, mat::Dict, outdir::AbstractString; dx=1)
+function analyze(n, mat::Dict, outdir::AbstractString; kwargs...)
   if n == 4
-    makeplots4(mat, outdir; dx=dx)
+    analyze4(mat, outdir; kwargs...)
   elseif n == 6
-    makeplots6(mat, outdir; dx=dx)
+    analyze6(mat, outdir; kwargs...)
   end
 end
 
 
-function validate(n, outdir::AbstractString)
+function validate(n, outdir::AbstractString; kwargs...)
   @assert n == 4 || n == 6 "n must be 4 or 6"
   cd(Pkg.dir("DCEMRI/test/q$n"))
 
@@ -282,7 +289,7 @@ function validate(n, outdir::AbstractString)
   isdir("$outdir/results") || mkdir("$outdir/results")
   results = fitdata(datafile="qiba$n.mat",outfile="$outdir/results/results.mat")
   println("Plotting results ...")
-  makeplots(n, results, "$outdir/results", dx=10)
+  analyze(n, results, "$outdir/results", dx=10; kwargs...)
 
   println("Running analysis of noisy QIBA v$n data ...")
   isdir("$outdir/results_noisy") || mkdir("$outdir/results_noisy")
@@ -290,12 +297,12 @@ function validate(n, outdir::AbstractString)
                      outfile="$outdir/results_noisy/results.mat")
 
   println("Plotting results ...")
-  makeplots(n, results, "$outdir/results_noisy")
+  analyze(n, results, "$outdir/results_noisy"; kwargs...)
   println("Validation complete. Results can be found in $outdir.")
 end
 
-validate(n) = validate(n, Pkg.dir("DCEMRI/test/q$n"))
-function validate()
-  validate(6)
-  validate(4)
+validate(n; kwargs...) = validate(n, Pkg.dir("DCEMRI/test/q$n"); kwargs...)
+function validate(kwargs...)
+  validate(6; kwargs...)
+  validate(4; kwargs...)
 end

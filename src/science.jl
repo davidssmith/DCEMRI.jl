@@ -87,7 +87,28 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
   resid = Inf*ones(n)
   params = zeros(3, n)
   modelmap = zeros(UInt8, n)
-
+  if 5 in models
+    @dprint "attempting linearized Extended Tofts-Kety model"
+    p, r = fitETM(t, Ct, Cp)
+    println(size(r), size(p))
+    resid[:] = r
+    params[:] = p
+    println(size(resid), size(params))
+    modelmap[idxs] = 5
+  end
+  if 4 in models
+    @dprint "attempting linearized Standard Tofts-Kety model"
+    p, r = fitTM(t::Vector{Float64}, Ct::Matrix{Float64}, Cp::Vector{Float64})
+    println(size(r), size(p))
+    for k in idxs
+      if r[k] <= resid[k]
+        resid[k] = r[k]
+        params[1:2,k] = p[:,k]
+        params[3,k] = 0.0
+        modelmap[k] = 4
+      end
+    end
+  end
   if 3 in models
     @dprint "attempting Extended Tofts-Kety model"
     p0 = [0.01, 0.01, 0.01]
@@ -96,7 +117,13 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
     p[2,idxs] = p[1,idxs] ./ p[2,idxs]
     resid[:] = squeeze(sum(abs2, r, 1), 1) / dof
     params[:] = p
-    modelmap[idxs] = 3
+    for k in idxs
+      if r[k] <= resid[k]
+        resid[k] = r[k]
+        params[:,k] = p[:,k]
+        modelmap[k] = 3
+      end
+    end
   end
   if 2 in models
     @dprint "attempting Standard Tofts-Kety model"
@@ -119,7 +146,7 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
     p0 = [0.01]
     f1(x,p) = onecompartment(x, p, Cp)
     p, r, dof = nlsfit(f1, Ct, idxs, t, p0)
-    r = squeeze(sumabs2(r, 1), 1) / dof
+    r = squeeze(sum(abs2, r, 1), 1) / dof
     for k in idxs
       if r[k] <= resid[k]
         resid[k] = r[k]

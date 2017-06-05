@@ -1,6 +1,6 @@
 using PyPlot
 
-function analyze6(mat::Dict, outdir::AbstractString; dx=1, plot=true)
+function analyze6(mat::Dict, outdir::AbstractString; dx=1, makeplots=true)
 
   R1map = mat["R10"]
   S0map = mat["S0"]
@@ -29,7 +29,7 @@ function analyze6(mat::Dict, outdir::AbstractString; dx=1, plot=true)
   print_with_color(:green, "\terrmax:\t", maximum(abs.(ve_error)),"\n")
   print_with_color(:green, "\tCCC:\t", ccc(ve_truth, ve),"\n")
 
-  if !plot
+  if !makeplots
     return
   end
 
@@ -121,7 +121,7 @@ end
 
 
 
-function analyze4(mat::Dict, outdir::AbstractString; dx=1, plot=true)
+function analyze4(mat::Dict, outdir::AbstractString; dx=1, makeplots=true)
   R1map = mat["R10"]
   S0map = mat["S0"]
   modelmap = mat["modelmap"]
@@ -159,7 +159,7 @@ function analyze4(mat::Dict, outdir::AbstractString; dx=1, plot=true)
   print_with_color(:green, "\terrmax:\t", maximum(abs.(vp_error))," %\n")
   print_with_color(:green, "\tCCC:\t", ccc(vp_truth, vp),"\n")
 
-  if !plot
+  if !makeplots
     return
   end
 

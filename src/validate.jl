@@ -15,6 +15,21 @@ function makeplots6(mat::Dict, outdir::AbstractString; dx=1)
   back = (S0map - minimum(S0map)) / (maximum(S0map) - minimum(S0map))
   mask = convert(Array{Bool,2}, mat["mask"])
 
+  # compare to known truths
+  u = ones(div(10,dx),div(10,dx))
+  Kt_truth = repmat([0.01*u; 0.02*u; 0.05*u; 0.1*u; 0.2*u; 0.35*u], 1, 5)
+  ve_truth = repmat([0.01*u; 0.05*u; 0.1*u; 0.2*u; 0.5*u]', 6, 1)
+
+  Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
+  ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
+  print_with_color(:green, "Kt\n\tRMSE:\t", sqrt(norm(Kt_error)^2 / length(Kt_error)), "%\n")
+  print_with_color(:green, "\terrmax:\t", maximum(abs.(Kt_error)),"\n")
+  print_with_color(:green, "\tCCC:\t", ccc(Kt_truth, Kt),"\n")
+  print_with_color(:green, "ve\n\tRMSE:\t", sqrt(norm(ve_error)^2 / length(ve_error)),"%\n")
+  print_with_color(:green, "\terrmax:\t", maximum(abs.(ve_error)),"\n")
+  print_with_color(:green, "\tCCC:\t", ccc(ve_truth, ve),"\n")
+
+
   ytpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(60,dx)-1))
   xtpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(50,dx)-1))
   ytlabels = [string(x) for x in [0.01,0.02,0.05,0.1,0.2,0.35]]
@@ -76,20 +91,6 @@ function makeplots6(mat::Dict, outdir::AbstractString; dx=1)
   ylabel("\$K^\\mathrm{trans}\$")
   savefig("$outdir/resid.pdf",bbox_inches="tight")
 
-  # compare to known truths
-  u = ones(div(10,dx),div(10,dx))
-  Kt_truth = repmat([0.01*u; 0.02*u; 0.05*u; 0.1*u; 0.2*u; 0.35*u], 1, 5)
-  ve_truth = repmat([0.01*u; 0.05*u; 0.1*u; 0.2*u; 0.5*u]', 6, 1)
-
-  Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
-  ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
-  println("Kt RMSE (%): ", sqrt(norm(Kt_error)^2 / length(Kt_error)))
-  println("Kt max error: ", maximum(abs.(Kt_error)))
-  println("Kt CCC: ", ccc(Kt_truth, Kt))
-  println("ve RMSE (%): ", sqrt(norm(ve_error)^2 / length(ve_error)))
-  println("ve max error: ", maximum(abs.(ve_error)))
-  println("ve CCC: ", ccc(ve_truth, ve))
-
   figure(figsize=(4.5, 4))
   clf()
   m = maximum(abs.(Kt_error))
@@ -130,6 +131,30 @@ function makeplots4(mat::Dict, outdir::AbstractString; dx=1)
   S0map[S0map .> q] = q
   back = (S0map - minimum(S0map)) / (maximum(S0map) - minimum(S0map))
   mask = convert(Array{Bool,2}, mat["mask"])
+
+  # compare to known truths
+  u = ones(div(180,dx),div(10,dx))
+  Kt_truth = hcat(0.01u, 0.02u, 0.05u, 0.1u, 0.2u)
+
+  u = ones(div(10,dx),div(50,dx))
+  u = vcat(0.1u, 0.2u, 0.5u)
+  ve_truth = vcat(u, u, u, u, u, u)
+
+  u = ones(div(30,dx),div(50,dx))
+  vp_truth = vcat(0.001u, 0.005u, 0.01u, 0.02u, 0.05u, 0.1u)
+
+  Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
+  ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
+  vp_error = clamp.(100.0*(vp - vp_truth) ./ (vp_truth + eps()), -100.0, 100.0)
+  print_with_color(:green, "Kt\n\tRMSE:\t", sqrt(norm(Kt_error)^2 / length(Kt_error)),"%\n")
+  print_with_color(:green, "\terrmax:\t", maximum(abs.(Kt_error)),"%\n")
+  print_with_color(:green, "\tCCC:\t", ccc(Kt_truth, Kt),"\n")
+  print_with_color(:green, "ve\n\tRMSE:\t", sqrt(norm(ve_error)^2 / length(ve_error)),"%\n")
+  print_with_color(:green, "\terrmax:\t", maximum(abs.(ve_error)),"%\n")
+  print_with_color(:green, "\tCCC:\t", ccc(ve_truth, ve),"\n")
+  print_with_color(:green, "vp\n\tRMSE:\t", sqrt(norm(vp_error)^2 / length(vp_error)),"%\n")
+  print_with_color(:green, "\terrmax:\t", maximum(abs.(vp_error)),"%\n")
+  print_with_color(:green, "\tCCC:\t", ccc(vp_truth, vp),"\n")
 
   ytpos = collect((div(10,dx)+floor(Integer, 5/dx)):div(30,dx):(div(180,dx)-1))
   xtpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(50,dx)-1))
@@ -202,29 +227,6 @@ function makeplots4(mat::Dict, outdir::AbstractString; dx=1)
   colorbar()
   savefig("$outdir/resid.pdf",bbox_inches="tight")
 
-  # compare to known truths
-  u = ones(div(180,dx),div(10,dx))
-  Kt_truth = hcat(0.01u, 0.02u, 0.05u, 0.1u, 0.2u)
-
-  u = ones(div(10,dx),div(50,dx))
-  u = vcat(0.1u, 0.2u, 0.5u)
-  ve_truth = vcat(u, u, u, u, u, u)
-
-  u = ones(div(30,dx),div(50,dx))
-  vp_truth = vcat(0.001u, 0.005u, 0.01u, 0.02u, 0.05u, 0.1u)
-
-  Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
-  ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
-  vp_error = clamp.(100.0*(vp - vp_truth) ./ (vp_truth + eps()), -100.0, 100.0)
-  println("Kt RMSE (%): ", sqrt(norm(Kt_error)^2 / length(Kt_error)))
-  println("Kt max error (%): ", maximum(abs.(Kt_error)))
-  println("Kt CCC: ", ccc(Kt_truth, Kt))
-  println("ve RMSE (%): ", sqrt(norm(ve_error)^2 / length(ve_error)))
-  println("ve max error (%): ", maximum(abs.(ve_error)))
-  println("ve CCC: ", ccc(ve_truth, ve))
-  println("vp RMSE (%): ", sqrt(norm(vp_error)^2 / length(vp_error)))
-  println("vp max error (%): ", maximum(abs.(vp_error)))
-  println("vp CCC: ", ccc(vp_truth, vp))
 
   figure(figsize=(3.5, 6))
   clf()

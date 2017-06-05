@@ -1,21 +1,13 @@
-language: cpp
-compiler:
-    - clang
+language: julia
 notifications:
     email: false
-env:
-    - JULIAVERSION="juliareleases"
-    - JULIAVERSION="julianightlies"
-before_install:
-    - sudo add-apt-repository ppa:staticfloat/julia-deps -y
-    - sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
-    - sudo apt-get update -qq -y
-    - sudo apt-get install libpcre3-dev julia -y
-    - git config --global user.name "Travis User"
-    - git config --global user.email "travis@example.net"
-    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-script:
-    - julia -e 'Pkg.init(); Pkg.clone(pwd())'
-    - julia -e 'Pkg.test("DCEMRI", coverage=true)'
+julia:
+    - 0.4
+    - 0.5
+    - nightly
+#script: # use the default script which is equivalent to the following
+#    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+#    - julia -e 'Pkg.init(); Pkg.clone(pwd())'
+#    - julia -e 'Pkg.test("DCEMRI", coverage=true)'
 after_success:
     - julia -e 'cd(Pkg.dir("DCEMRI")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'

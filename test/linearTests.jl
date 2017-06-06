@@ -16,11 +16,11 @@ for i = 1:length(nList)
   curDx = 1
   if mod(i,2)==1
     datafile="qiba$n.mat"
-    outdir = Pkg.dir("DCEMRI/test/q$n") * "\\results"
+    outdir = Pkg.dir("DCEMRI/test/q$n") * "/results"
     curDx = 10
   else
     datafile="qiba$(n)noisy.mat"
-    outdir = Pkg.dir("DCEMRI/test/q$n") * "\\results_noisy"
+    outdir = Pkg.dir("DCEMRI/test/q$n") * "/results_noisy"
   end
   isdir(outdir) || mkdir(outdir)
 

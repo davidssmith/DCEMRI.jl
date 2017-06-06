@@ -1,2 +1,6 @@
 *.pdf
 *.png
+
+# Exclude the validation results
+/test/q4/results*
+/test/q6/results*

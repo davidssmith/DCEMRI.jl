@@ -89,21 +89,32 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
   modelmap = zeros(UInt8, n)
   if 5 in models
     @dprint "attempting linearized Extended Tofts-Kety model"
+    tic()
     p, r = fitETM(t, Ct, Cp)
+    runtimeLL = toq()
+    @dprint "Fitted $nt x $nidxs points in $runtimeLL seconds"
     println(size(r), size(p))
     resid[:] = r
-    params[:] = p
+    # Format of p = [KTrans, kep, vp]
+    # Desired form: [KTrans, ve, vp]
+    params[1,:] = p[1,:]
+    params[2,:] = p[1,:] ./ p[2,:]
+    params[3,:] = p[3,:]
     println(size(resid), size(params))
     modelmap[idxs] = 5
   end
   if 4 in models
     @dprint "attempting linearized Standard Tofts-Kety model"
-    p, r = fitTM(t::Vector{Float64}, Ct::Matrix{Float64}, Cp::Vector{Float64})
+    tic()
+    p, r = fitTM(t, Ct, Cp)
+    runtimeLL = toq()
+    @dprint "Fitted $nt x $nidxs points in $runtimeLL seconds"
     println(size(r), size(p))
     for k in idxs
       if r[k] <= resid[k]
         resid[k] = r[k]
-        params[1:2,k] = p[:,k]
+        params[1,k] = p[1,k]
+        params[2,k] = p[1,k] / p[2,k] # ve = Ktrans/kep (i.e. p[1]/p[2])
         params[3,k] = 0.0
         modelmap[k] = 4
       end

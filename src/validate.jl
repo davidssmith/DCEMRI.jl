@@ -22,15 +22,17 @@ function analyze6(mat::Dict, outdir::AbstractString; dx=1, makeplots=true)
 
   Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
   ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
+  cccKt = ccc(Kt_truth, Kt)
+  cccve = ccc(ve_truth, ve)
   print_with_color(:green, "Kt\n\tRMSE:\t$(sqrt(norm(Kt_error)^2 / length(Kt_error))) %\n")
   print_with_color(:green, "\terrmax:\t$(maximum(abs.(Kt_error)))\n")
-  print_with_color(:green, "\tCCC:\t$(ccc(Kt_truth, Kt))\n")
+  print_with_color(:green, "\tCCC:\t$cccKt\n")
   print_with_color(:green, "ve\n\tRMSE:\t$(sqrt(norm(ve_error)^2 / length(ve_error))) %\n")
   print_with_color(:green, "\terrmax:\t$(maximum(abs.(ve_error)))\n")
-  print_with_color(:green, "\tCCC:\t$(ccc(ve_truth, ve))\n")
+  print_with_color(:green, "\tCCC:\t$cccve\n")
 
   if !makeplots
-    return
+    return (cccKt, cccve)
   end
 
   ytpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(60,dx)-1))
@@ -118,6 +120,8 @@ function analyze6(mat::Dict, outdir::AbstractString; dx=1, makeplots=true)
   ylabel("\$K^\\mathrm{trans}\$")
   colorbar()
   savefig("$outdir/ve_error.pdf",bbox_inches="tight")
+
+  return (cccKt, cccve)
 end
 
 
@@ -150,18 +154,21 @@ function analyze4(mat::Dict, outdir::AbstractString; dx=1, makeplots=true)
   Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
   ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
   vp_error = clamp.(100.0*(vp - vp_truth) ./ (vp_truth + eps()), -100.0, 100.0)
+  cccKt = ccc(Kt_truth, Kt)
+  cccve = ccc(ve_truth, ve)
+  cccvp = ccc(vp_truth, vp)
   print_with_color(:green, "Kt\n\tRMSE:\t$(sqrt(norm(Kt_error)^2 / length(Kt_error))) %\n")
   print_with_color(:green, "\terrmax:\t$(maximum(abs.(Kt_error))) %\n")
-  print_with_color(:green, "\tCCC:\t$(ccc(Kt_truth, Kt))\n")
+  print_with_color(:green, "\tCCC:\t$cccKt\n")
   print_with_color(:green, "ve\n\tRMSE:\t$(sqrt(norm(ve_error)^2 / length(ve_error))) %\n")
   print_with_color(:green, "\terrmax:\t$(maximum(abs.(ve_error))) %\n")
-  print_with_color(:green, "\tCCC:\t$(ccc(ve_truth, ve))\n")
+  print_with_color(:green, "\tCCC:\t$cccve\n")
   print_with_color(:green, "vp\n\tRMSE:\t$(sqrt(norm(vp_error)^2 / length(vp_error))) %\n")
   print_with_color(:green, "\terrmax:\t$(maximum(abs.(vp_error))) %\n")
-  print_with_color(:green, "\tCCC:\t$(ccc(vp_truth, vp))\n")
+  print_with_color(:green, "\tCCC:\t$cccvp\n")
 
   if !makeplots
-    return
+    return (cccKt, cccve, cccvp)
   end
 
   ytpos = collect((div(10,dx)+floor(Integer, 5/dx)):div(30,dx):(div(180,dx)-1))
@@ -272,13 +279,15 @@ function analyze4(mat::Dict, outdir::AbstractString; dx=1, makeplots=true)
   ylabel("\$v_\\mathrm{p}\$")
   colorbar()
   savefig("$outdir/vp_error.pdf",bbox_inches="tight")
+
+  return (cccKt, cccve, cccvp)
 end
 
 function analyze(n, mat::Dict, outdir::AbstractString; kwargs...)
   if n == 4
-    analyze4(mat, outdir; kwargs...)
+    return analyze4(mat, outdir; kwargs...)
   elseif n == 6
-    analyze6(mat, outdir; kwargs...)
+    return analyze6(mat, outdir; kwargs...)
   end
 end
 
@@ -289,20 +298,20 @@ function validate(n, outdir::AbstractString; kwargs...)
 
   println("Running analysis of noise-free QIBA v$n data ...")
   isdir("$outdir/results") || mkdir("$outdir/results")
-  results = fitdata(datafile="qiba$n.mat",outfile="$outdir/results/results.mat")
-  analyze(n, results, "$outdir/results", dx=10; kwargs...)
+  results = fitdata(datafile="qiba$n.mat",outfile="$outdir/results/results.mat",save=false)
+  ccc = analyze(n, results, "$outdir/results", dx=10; kwargs...)
 
   println("Running analysis of noisy QIBA v$n data ...")
   isdir("$outdir/results_noisy") || mkdir("$outdir/results_noisy")
-  results = fitdata(datafile="qiba$(n)noisy.mat",
-                     outfile="$outdir/results_noisy/results.mat")
+  results = fitdata(datafile="qiba$(n)noisy.mat", outfile="$outdir/results_noisy/results.mat",save=false)
 
-  analyze(n, results, "$outdir/results_noisy"; kwargs...)
-  println("Validation complete. Results can be found in $outdir.")
+  cccnoisy = analyze(n, results, "$outdir/results_noisy"; kwargs...)
+  println("Validation complete. If saved, results can be found in $outdir.")
+  return (ccc, cccnoisy)
 end
 
 validate(n; kwargs...) = validate(n, Pkg.dir("DCEMRI/test/q$n"); kwargs...)
 function validate(kwargs...)
-  validate(6; kwargs...)
-  validate(4; kwargs...)
+  ccc6, cccnoisy6 = validate(6; kwargs...)
+  ccc4, cccnoisy4 = validate(4; kwargs...)
 end

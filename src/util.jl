@@ -73,6 +73,7 @@ function defaults()
   opts["models"]     = [2]
   opts["plotting"]   = false
   opts["verbose"]    = true
+  opts["save"]       = true
   opts["workers"]    = 4
   opts
 end

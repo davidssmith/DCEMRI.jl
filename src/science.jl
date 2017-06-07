@@ -240,7 +240,6 @@ function fitdata(opts::Dict)
   Ct = tissueconc(R1, R10, relaxivity)
   params, resid, modelmap = fitdce(Ct, mask, t, Cp, models=models)
 
-  @dprint "saving results to $outfile"
   results = Dict()
   results["t"] = t
   results["Cp"] = Cp
@@ -257,8 +256,10 @@ function fitdata(opts::Dict)
   results["ve"] = reshape(params[2,:], dims)
   results["vp"] = reshape(params[3,:], dims)
   results["resid"] = resid
-  matwrite(outfile, results)
-
+  if opts["save"]
+    @dprint "saving results to $outfile"
+    matwrite(outfile, results)
+  end
   results
 end
 fitdata(filename::AbstractString) = fitdata(datafile=filename) # point to MAT file

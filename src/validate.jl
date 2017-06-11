@@ -36,7 +36,7 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
   ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
   cccKt = ccc(Kt_truth, Kt)
   cccve = ccc(ve_truth, ve)
-  cccvp = NaN
+  cccvp = 0.0 # ccc for ExtTofts is calculated in next block
   print_with_color(:green, "Kt\n\tRMSE:\t$(sqrt(norm(Kt_error)^2 / length(Kt_error))) %\n")
   print_with_color(:green, "\terrmax:\t$(maximum(abs.(Kt_error)))\n")
   print_with_color(:green, "\tCCC:\t$cccKt\n")
@@ -61,6 +61,7 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
     xtpos = collect((0+floor(Integer, 5/dx)):div(10,dx):(div(50,dx)-1))
     ytlabels = [string(x) for x in [0.01,0.02,0.05,0.1,0.2,0.35]]
     xtlabels = [string(x) for x in [0.01,0.05,0.1,0.2,0.5]]
+    # Size of figures that contain 2D maps and their x/y labels
     mapWidth = 4.5
     mapHeight = 4.5
     mapLabelX = "\$v_\\mathrm{e}\$"
@@ -77,6 +78,7 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
   end
 
   println("Plotting results ...")
+
   # AIF
   figure(figsize=(4.5,4.5))
   clf()
@@ -102,7 +104,7 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
   # PARAMETER MAPS
   figure(figsize=(mapWidth, mapHeight))
   clf()
-  imshow(Kt, interpolation="nearest", cmap="cubehelix", vmin=0, vmax=0.35)
+  imshow(Kt, interpolation="nearest", cmap="cubehelix", vmin=0)
   title("\$K^\\mathrm{trans}\$ (min\$^{-1}\$)")
   xticks(xtpos, xtlabels)
   yticks(ytpos, ytlabels)
@@ -113,7 +115,7 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
 
   figure(figsize=(mapWidth, mapHeight))
   clf()
-  imshow(ve, interpolation="nearest", cmap="cubehelix", vmin=0, vmax=0.6)
+  imshow(ve, interpolation="nearest", cmap="cubehelix", vmin=0)
   title("\$v_\\mathrm{e}\$")
   xticks(xtpos, xtlabels)
   yticks(ytpos, ytlabels)
@@ -125,7 +127,7 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
   if isExt
     figure(figsize=(mapWidth, mapHeight))
     clf()
-    imshow(vp, interpolation="nearest", cmap="cubehelix", vmin=0, vmax=0.12)
+    imshow(vp, interpolation="nearest", cmap="cubehelix", vmin=0)
     title("\$v_p\$")
     xticks(xtpos, xtlabels, fontsize=8)
     yticks(ytpos, ytlabels)

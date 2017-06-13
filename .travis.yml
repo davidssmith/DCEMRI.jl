@@ -7,6 +7,7 @@ julia:
     - 0.5
     - 0.6
     - nightly
+install: travis_wait 30 mvn install
 #script: # use the default script which is equivalent to the following
 #    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #    - julia -e 'Pkg.init(); Pkg.clone(pwd())'

@@ -126,8 +126,7 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
     f3(x,p) = extendedtoftskety(x, p, Cp)
     p, r, dof = nlsfit(f3, Ct, idxs, t, p0)
     p[2,idxs] = p[1,idxs] ./ p[2,idxs]
-    resid[:] = squeeze(sum(abs2, r, 1), 1) / dof
-    params[:] = p
+    r = squeeze(sum(abs2, r, 1), 1) / dof
     for k in idxs
       if r[k] <= resid[k]
         resid[k] = r[k]

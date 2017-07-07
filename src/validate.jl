@@ -263,16 +263,12 @@ function makeQibaNoisy(n; nRep=10, doOverwrite=true, noiseSigma=-1.0)
   dceDat = matData["DCEdata"]
   # Repeat each element the desired number of times
   dceDat = repeat(dceDat, inner=[1, nRep, nRep]) # First dim is time, not repeated
-  # Default noise = arbitraryWeight * baselineSignal_inAIF / sqrt(2)
+  # Default noise = arbitraryWeight * baselineSignal / sqrt(2)
   if (noiseSigma < 0)
-    if n==4
-      noiseSigma = 0.2 * 15 / sqrt(2)
-    elseif n==6
-      noiseSigma = 0.2 * 632 / sqrt(2)
-    end
+    noiseSigma = 0.2 * dceDat[1,1,1] / sqrt(2)
   end
   # Add complex noise
-  srand(11235813213455) # Fixed arbitrary seed for reproducible noise
+  srand(123456) # Fixed arbitrary seed for reproducible noise
   dceDat = dceDat + noiseSigma * ( randn(size(dceDat)) + im*randn(size(dceDat)) )
   # Take the magntude of the complex signal
   dceDat = abs.(dceDat)

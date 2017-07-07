@@ -104,7 +104,7 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
   # PARAMETER MAPS
   figure(figsize=(mapWidth, mapHeight))
   clf()
-  imshow(Kt, interpolation="nearest", cmap="cubehelix", vmin=0)
+  imshow(Kt, interpolation="nearest", cmap="cubehelix", vmin=0, vmax=maximum(Kt_truth))
   title("\$K^\\mathrm{trans}\$ (min\$^{-1}\$)")
   xticks(xtpos, xtlabels, fontsize=8)
   yticks(ytpos, ytlabels)
@@ -115,7 +115,7 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
 
   figure(figsize=(mapWidth, mapHeight))
   clf()
-  imshow(ve, interpolation="nearest", cmap="cubehelix", vmin=0)
+  imshow(ve, interpolation="nearest", cmap="cubehelix", vmin=0, vmax=maximum(ve_truth))
   title("\$v_\\mathrm{e}\$")
   xticks(xtpos, xtlabels, fontsize=8)
   yticks(ytpos, ytlabels)
@@ -127,7 +127,7 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
   if isExt
     figure(figsize=(mapWidth, mapHeight))
     clf()
-    imshow(vp, interpolation="nearest", cmap="cubehelix", vmin=0)
+    imshow(vp, interpolation="nearest", cmap="cubehelix", vmin=0, vmax=maximum(vp_truth))
     title("\$v_p\$")
     xticks(xtpos, xtlabels, fontsize=8)
     yticks(ytpos, ytlabels)

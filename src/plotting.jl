@@ -1,9 +1,3 @@
-if Pkg.installed("PyPlot")==Void()
-  # println("Optional package (PyPlot) not installed.")
-else
-  using PyPlot
-end
-
 function jetrgb(x::Float64)
   y = 4x
   r = min(y - 1.5, -y + 4.5)

@@ -10,6 +10,12 @@ export ser, r1eff, tissueconc, fitr1, fitdce, fitdata,
 const verbose = true
 const version = v"0.1.2"
 
+if Pkg.installed("PyPlot")==Void()
+  # println("Optional package (PyPlot) not installed.")
+else
+  using PyPlot
+end
+
 include("util.jl")
 include("fitting.jl")
 include("models.jl")

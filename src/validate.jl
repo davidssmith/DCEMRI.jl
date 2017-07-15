@@ -1,12 +1,6 @@
-if Pkg.installed("PyPlot")==Void()
-  # println("Optional package (PyPlot) not installed.")
-else
-  using PyPlot
-end
-
 function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt=false)
 
-  if Pkg.installed("PyPlot")==Void()
+  if (makeplots==true) && (Pkg.installed("PyPlot")==Void())
     # Do no make plots if PyPlot not installed
     println("PyPlot not installed. Plots will not be produced.")
     makeplots=false

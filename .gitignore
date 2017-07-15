@@ -4,6 +4,7 @@
 # Exclude the validation results
 /test/q4/results*
 /test/q6/results*
+/demo/result*
 
 # Exclude data containing noisy
 /test/q4/qiba4nois*

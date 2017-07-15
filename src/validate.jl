@@ -237,7 +237,7 @@ end
 
 
 function makeQibaNoisy(n; nRep=10, doOverwrite=true, noiseSigma=-1.0)
-# Purpose: Reads is noiseless QIBA data and outputs noisy version
+# Purpose: Reads in noiseless QIBA data and outputs noisy version
 # Each voxel is also replicated 10 times
 
   # Location of noiseless data
@@ -252,7 +252,7 @@ function makeQibaNoisy(n; nRep=10, doOverwrite=true, noiseSigma=-1.0)
     return # ... then end it right here
   end
 
-  @dprint "Producing noisy version of $inFile"
+  println("Producing noisy version of $inFile")
   # Load data
   matData = matread(inFile)
 
@@ -278,7 +278,7 @@ function makeQibaNoisy(n; nRep=10, doOverwrite=true, noiseSigma=-1.0)
     noiseSigma = 0.2 * dceDat[1,1,1] / sqrt(2)
   end
   # Add complex noise
-  srand(123456) # Fixed arbitrary seed for reproducible noise
+  srand(9876543210) # Fixed arbitrary seed for reproducible noise
   dceDat = dceDat + noiseSigma * ( randn(size(dceDat)) + im*randn(size(dceDat)) )
   # Take the magntude of the complex signal
   dceDat = abs.(dceDat)
@@ -287,7 +287,7 @@ function makeQibaNoisy(n; nRep=10, doOverwrite=true, noiseSigma=-1.0)
 
   # Save modified data to disk
   matwrite(outFile, matData)
-  @dprint "Noisy data saved to $outFile"
+  println("Noisy data saved to $outFile")
 
   return
 end

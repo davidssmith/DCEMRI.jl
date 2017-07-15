@@ -8,8 +8,8 @@ using DCEMRI
 nList = collect([6,6,4,4])
 
 # Create noisy data
-makeQibaNoisy(4)
-makeQibaNoisy(6)
+DCEMRI.makeQibaNoisy(4)
+DCEMRI.makeQibaNoisy(6)
 
 for i = 1:length(nList)
   n=nList[i]

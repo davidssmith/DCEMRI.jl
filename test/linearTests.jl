@@ -7,6 +7,10 @@ using DCEMRI
 # First run is noiseless, second run is with noise
 nList = collect([6,6,4,4])
 
+# Create noisy data
+DCEMRI.makeQibaNoisy(4)
+DCEMRI.makeQibaNoisy(6)
+
 for i = 1:length(nList)
   n=nList[i]
   # Move to test directory

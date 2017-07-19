@@ -1,5 +1,3 @@
-using PyPlot
-
 function jetrgb(x::Float64)
   y = 4x
   r = min(y - 1.5, -y + 4.5)

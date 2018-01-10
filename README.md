@@ -56,7 +56,7 @@ julia> using DCEMRI
 
 julia> validate()
 ```
-This will run both validations (4 and 6), which could take up to an hour, depending on the number of cores you started Julia with and how fast your hardware is. Examine the results to make sure that the parameters have been recovered accurately.  The text output of the scripts will also print quantitative measures of parameter accuracy. By default validation results will be written to subdirectories of the __DCEMRI.jl__ module directory, which is `$HOME/.julia/v0.3/DCEMRI` on Unix-based systems.  You can customize this directory for the validation by passing the output path as the second argument.  This only works the individual validation functions, e.g. `validate(6, "/my/path")` or `validate(4, "/my/path")`.  Since both validations write figures with identical names, they can't go to the same output directory. 
+This will run both validations (4 and 6), which could take up to an hour, depending on the number of cores you started Julia with and how fast your hardware is. Examine the results to make sure that the parameters have been recovered accurately.  The text output of the scripts will also print quantitative measures of parameter accuracy. By default validation results will be written to subdirectories of the __DCEMRI.jl__ module directory, which is queried with `Pkg.dir("DCEMRI")`.  You can customize this directory for the validation by passing the output path as the second argument.  This only works the individual validation functions, e.g. `validate(6, "/my/path")` or `validate(4, "/my/path")`.  Since both validations write figures with identical names, they can't go to the same output directory.
 
 An example output is shown here:
 
@@ -124,7 +124,7 @@ I have already done this step for you and included the MAT files.  This also avo
 ## Running the In Vivo Demo
 
 You can run the in vivo data demo with the command
-`demo()`.  It will save the output by default to `$HOME/.julia/v0.3/DCEMRI/demo/results` by default.  You can change this location by passing a path string to `demo()`.  After a few seconds to a few minutes, depending on the speed of your machine, you will see the following output text:
+`demo()`.  It will save the output by default to `Pkg.dir("DCEMRI","demo/results")` by default.  You can change this location by passing a path string to `demo()`.  After a few seconds to a few minutes, depending on the speed of your machine, you will see the following output text:
 
 ```
 julia> demo()

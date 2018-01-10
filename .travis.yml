@@ -1,8 +1,6 @@
 language: julia
 notifications:
     email: false
-env:
-    - PYTHON=""
 julia:
     - 0.6
     - nightly

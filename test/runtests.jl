@@ -4,9 +4,9 @@ using DCEMRI
 
 ccc4, cccnoisy4 = validate(4, makeplots=false)
 @testset "QIBA v4 Extended Tofts Phantom" begin
-  @test ccc4[1] >= 0.9998
-  @test ccc4[2] >= 0.8904
-  @test ccc4[3] >= 0.9999
+  @test ccc4[1] >= 0.99
+  @test ccc4[2] >= 0.85
+  @test ccc4[3] >= 0.99
   @test signif(cccnoisy4[1],2) >= 0.97
   @test signif(cccnoisy4[2],2) >= 0.70
   @test signif(cccnoisy4[3],2) >= 0.97

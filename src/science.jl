@@ -13,6 +13,36 @@ function ser{N}(x::Array{Float64,N}, thresh::Float64=0.01)
   reshape(SER, dims[2:end])
 end
 
+function findBolusArrival(x::Vector{Float64})
+	# Estimates the bolus arrival frame by using CUSUM (cumulative sum control chart)
+	# to find when the signal changes abruptly.
+	# If CUSUM fails, then a default value of '2' will be returned 
+	
+	# Perform CUSUM - using fixed criteria
+	mx = mean(x)
+	stdx = std(x)
+	upL = zeros(length(x))
+	loL = zeros(length(x))
+
+	for i=2:length(x)
+		upL[i] = max(0, upL[i-1] + x[i] - mx - 0.5*stdx)
+		loL[i] = min(0, loL[i-1] + x[i] - mx + 0.5*stdx)
+	end
+	upVals = find(upL .> 5.0*stdx)
+	loVals = find(loL .< 5.0*stdx)
+	
+	candidates = [2] # Default candidate for bolus arrival is the 2nd frame
+	if length(upVals)>0 
+		# Divding by half to be safe / ensure that bolus hasn't arrived
+		# In theory, it would be ok to not divide by 2
+		push!(candidates,round(upVals[1]/2))
+	end
+	if length(loVals)>0
+		push!(candidates,round(loVals[1]/2))
+	end
+	return(maximum(candidates))
+end
+
 function r1eff{M,N}(S::Array{Float64,M}, R10::Array{Float64,N}, TR::Float64, flip::Float64)
   @dprint "converting DCE signal to effective R1"
   @assert 0.0 < flip "flip angle must be positive"
@@ -21,7 +51,8 @@ function r1eff{M,N}(S::Array{Float64,M}, R10::Array{Float64,N}, TR::Float64, fli
   nt = dims[1]
   n = prod(dims[2:end])
   S = reshape(S, (nt, n))
-  S0 = mean(S[1:2,:],1)
+  bolusArrivalFrame = findBolusArrival(vec(mean(S,2)))
+  S0 = mean(S[1:bolusArrivalFrame,:],1)
   A = copy(S)
   R1 = similar(S)
   for k = 1:n

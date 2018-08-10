@@ -1,4 +1,4 @@
-function ser{N}(x::Array{Float64,N}, thresh::Float64=0.01)
+function ser(x::Array{Float64,N}, thresh::Float64=0.01) where N
   @dprint "computing signal enhancement ratios"
   @assert thresh > 0.0
   dims = size(x)
@@ -13,7 +13,7 @@ function ser{N}(x::Array{Float64,N}, thresh::Float64=0.01)
   reshape(SER, dims[2:end])
 end
 
-function r1eff{M,N}(S::Array{Float64,M}, R10::Array{Float64,N}, TR::Float64, flip::Float64)
+function r1eff(S::Array{Float64,M}, R10::Array{Float64,N}, TR::Float64, flip::Float64) where {M,N}
   @dprint "converting DCE signal to effective R1"
   @assert 0.0 < flip "flip angle must be positive"
   @assert 0.0 < TR && TR < 1.0 "TR must be in units of ms"
@@ -21,7 +21,7 @@ function r1eff{M,N}(S::Array{Float64,M}, R10::Array{Float64,N}, TR::Float64, fli
   nt = dims[1]
   n = prod(dims[2:end])
   S = reshape(S, (nt, n))
-  S0 = mean(S[1:2,:],1)
+  S0 = mean(S[1:2,:], dims=1)
   A = copy(S)
   R1 = similar(S)
   for k = 1:n
@@ -36,7 +36,7 @@ function r1eff{M,N}(S::Array{Float64,M}, R10::Array{Float64,N}, TR::Float64, fli
   reshape(R1, dims)
 end
 
-function tissueconc{M,N}(R1::Array{Float64,M}, R10::Array{Float64,N}, r1::Float64)
+function tissueconc(R1::Array{Float64,M}, R10::Array{Float64,N}, r1::Float64) where {M,N}
   @dprint "converting effective R1 to tracer tissue concentration Ct"
   @assert r1 > 0.0
   dims = size(R1)
@@ -63,7 +63,8 @@ function fitr1(x, flip_angles::Vector{Float64}, TR::Float64,
   x = reshape(x, (nangles, n))
   p0 = [maximum(x), 1.0]
   model(x,p) = spgreqn(x, p, TR)
-  idxs = find(mean(x, 1) .> 0.1*maximum(x))
+  idxs = find(mean(x, dims=1) .> 0.1*maximum(x))
+  
   params, resid = nlsfit(model, x, idxs, flip_angles, p0)
   S0 = reshape(params[1,:], sizein[2:end])
   R10 = reshape(params[2,:], sizein[2:end])
@@ -71,8 +72,8 @@ function fitr1(x, flip_angles::Vector{Float64}, TR::Float64,
 end
 
 
-function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64},
-                   Cp::Vector{Float64}; models=[2], residthresh=1.0, Ktmax=5.0)
+function fitdce(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64},
+                   Cp::Vector{Float64}; models=[2], residthresh=1.0, Ktmax=5.0) where {M,N}
   @dprint "fitting DCE data"
   sizein = size(Ct)
   n = prod(sizein[2:end])
@@ -89,9 +90,7 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
   modelmap = zeros(UInt8, n)
   if 5 in models
     @dprint "attempting linearized Extended Tofts-Kety model"
-    tic()
-    p, r = fitETM(t, Ct, Cp)
-    runtimeLL = toq()
+    runtimeLL = @elapsed p, r = fitETM(t, Ct, Cp)
     @dprint "Fitted $nt x $nidxs points in $runtimeLL seconds"
     println(size(r), size(p))
     resid[:] = r
@@ -105,9 +104,7 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
   end
   if 4 in models
     @dprint "attempting linearized Standard Tofts-Kety model"
-    tic()
-    p, r = fitTM(t, Ct, Cp)
-    runtimeLL = toq()
+    runtimeLL = @elapsed p, r = fitTM(t, Ct, Cp)
     @dprint "Fitted $nt x $nidxs points in $runtimeLL seconds"
     println(size(r), size(p))
     for k in idxs
@@ -126,7 +123,7 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
     f3(x,p) = extendedtoftskety(x, p, Cp)
     p, r, dof = nlsfit(f3, Ct, idxs, t, p0)
     p[2,idxs] = p[1,idxs] ./ p[2,idxs]
-    r = squeeze(sum(abs2, r, 1), 1) / dof
+    r = dropdims(sum(abs2, r, dims=1), dims=1) / dof
     for k in idxs
       if r[k] <= resid[k]
         resid[k] = r[k]
@@ -140,7 +137,7 @@ function fitdce{M,N}(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64}
     p0 = [0.01, 0.01]
     f2(x,p) = toftskety(x, p, Cp)
     p, r, dof = nlsfit(f2, Ct, idxs, t, p0)
-    r = squeeze(sum(abs2, r, 1), 1) / dof
+    r = dropdims(sum(abs2, r, dims=1), dims=1) / dof
     for k in idxs
       if r[k] <= resid[k]
         resid[k] = r[k]

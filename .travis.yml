@@ -2,7 +2,8 @@ language: julia
 notifications:
     email: false
 julia:
-    - 0.6
+    - 0.7
+    - 1.0
     - nightly
 #script: # use the default script which is equivalent to the following
 #    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi

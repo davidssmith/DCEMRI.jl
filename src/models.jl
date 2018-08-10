@@ -14,7 +14,7 @@ function expConv(A::Vector{Float64}, B::Float64, t::Vector{Float64})
   x = B * ( t[2:n] - t[1:n-1] )
   dA = ( A[2:n] - A[1:n-1] ) ./ x
   E = exp.(-x)
-  E0 = 1 - E
+  E0 = 1 .- E
   E1 = x - E0
   iterAdd = A[1:n-1] .* E0 + dA .* E1
   f = zeros(n)
@@ -27,7 +27,7 @@ end
 function toftskety(t::Vector{Float64}, p::Vector{Float64}, Cp::Vector{Float64})
   # Standard Tofts-Kety Model.  Works when t_dce = t_aif only, so you should
   # resample the AIF to match the DCE dynamic spacing before using.
-  Ct = zeros(t)
+  Ct = zero(t)
   kep = p[2]  # kep = Ktrans / ve
   Ct = p[1] * expConv(Cp,kep,t)
   #   for k in 1:length(Ct)

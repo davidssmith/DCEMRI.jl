@@ -3,6 +3,7 @@ module DCEMRI
 using ArgParse
 using Calculus    #.jacobian
 using MAT
+using Pkg, LinearAlgebra, Random, Statistics, Distributed, Printf, LsqFit
 
 export ser, r1eff, tissueconc, fitr1, fitdce, fitdata,
   defaults, ccc, nlsfit, makeplots, demo, validate
@@ -10,10 +11,10 @@ export ser, r1eff, tissueconc, fitr1, fitdce, fitdata,
 const verbose = true
 const version = v"0.1.2"
 
-if Pkg.installed("PyPlot")==Void()
-  # println("Optional package (PyPlot) not installed.")
+if haskey(Pkg.installed(),"PyPlot")
+    using PyPlot
 else
-  using PyPlot
+    # println("Optional package (PyPlot) not installed.")
 end
 
 include("util.jl")

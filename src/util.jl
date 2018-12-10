@@ -93,13 +93,13 @@ function validate(d::Dict)
   @assert (haskey(d,"R10") && haskey(d,"S0")) || (haskey(d,"T1data") && haskey(d,"T1flip")) "Input must contain either R10+S0 or T1data+T1flip."
 end
 
-function ccc{T,N}(x::Array{T,N}, y::Array{T,N})
+function ccc(x::Array{T,N}, y::Array{T,N}) where {T, N}
   # concordance correlation coefficient
   m1 = mean(x)
   m2 = mean(y)
   s1 = var(x)*(length(x) - 1.0) / length(x)
   s2 = var(y)*(length(y) - 1.0) / length(y)
-  s12 = sum((x - m1).*(y - m2)) / length(x)
+  s12 = sum((x .- m1).*(y .- m2)) / length(x)
   2s12 / (s1 + s2 + (m1 - m2).^2)
 end
 
@@ -110,4 +110,8 @@ function kwargs2dict(kwargs)
         d[string(k)] = v
     end
     d
+end
+
+function find(A::AbstractArray)
+  (LinearIndices(A))[findall(x->x!=0, A)]
 end

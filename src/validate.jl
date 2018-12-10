@@ -1,6 +1,6 @@
 function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt=false)
 
-  if (makeplots==true) && (Pkg.installed("PyPlot")==Void())
+  if (makeplots==true) && !haskey(Pkg.installed(),"PyPlot")
     # Do no make plots if PyPlot not installed
     println("PyPlot not installed. Plots will not be produced.")
     makeplots=false
@@ -15,15 +15,15 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
   vp = mat["vp"]
   resid = mat["resid"]
   q = quantile(S0map[:], 0.99)
-  S0map[S0map .> q] = q
-  back = (S0map - minimum(S0map)) / (maximum(S0map) - minimum(S0map))
+  S0map[S0map .> q] .= q
+  back = (S0map .- minimum(S0map)) / (maximum(S0map) - minimum(S0map))
   mask = convert(Array{Bool,2}, mat["mask"])
 
   # compare to known truths
   if ~isExt
     u = ones(div(10,dx),div(10,dx))
-    Kt_truth = repmat([0.01*u; 0.02*u; 0.05*u; 0.1*u; 0.2*u; 0.35*u], 1, 5)
-    ve_truth = repmat([0.01*u; 0.05*u; 0.1*u; 0.2*u; 0.5*u]', 6, 1)
+    Kt_truth = repeat([0.01*u; 0.02*u; 0.05*u; 0.1*u; 0.2*u; 0.35*u], 1, 5)
+    ve_truth = repeat([0.01*u; 0.05*u; 0.1*u; 0.2*u; 0.5*u]', 6, 1)
   else
     u = ones(div(180,dx),div(10,dx))
     Kt_truth = hcat(0.01u, 0.02u, 0.05u, 0.1u, 0.2u)
@@ -36,24 +36,24 @@ function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt
     vp_truth = vcat(0.001u, 0.005u, 0.01u, 0.02u, 0.05u, 0.1u)
   end
 
-  Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth + eps()), -100.0, 100.0)
-  ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth + eps()), -100.0, 100.0)
+  Kt_error = clamp.(100.0*(Kt - Kt_truth) ./ (Kt_truth .+ eps()), -100.0, 100.0)
+  ve_error = clamp.(100.0*(ve - ve_truth) ./ (ve_truth .+ eps()), -100.0, 100.0)
   cccKt = ccc(Kt_truth, Kt)
   cccve = ccc(ve_truth, ve)
   cccvp = 0.0 # ccc for ExtTofts is calculated in next block
-  print_with_color(:green, "Kt\n\tRMSE:\t$(sqrt(norm(Kt_error)^2 / length(Kt_error))) %\n")
-  print_with_color(:green, "\terrmax:\t$(maximum(abs.(Kt_error)))\n")
-  print_with_color(:green, "\tCCC:\t$cccKt\n")
-  print_with_color(:green, "ve\n\tRMSE:\t$(sqrt(norm(ve_error)^2 / length(ve_error))) %\n")
-  print_with_color(:green, "\terrmax:\t$(maximum(abs.(ve_error)))\n")
-  print_with_color(:green, "\tCCC:\t$cccve\n")
+  printstyled("Kt\n\tRMSE:\t$(sqrt(norm(Kt_error)^2 / length(Kt_error))) %\n", color=:green)
+  printstyled("\terrmax:\t$(maximum(abs.(Kt_error)))\n", color=:green)
+  printstyled("\tCCC:\t$cccKt\n", color=:green)
+  printstyled("ve\n\tRMSE:\t$(sqrt(norm(ve_error)^2 / length(ve_error))) %\n", color=:green)
+  printstyled("\terrmax:\t$(maximum(abs.(ve_error)))\n", color=:green)
+  printstyled("\tCCC:\t$cccve\n", color=:green)
 
   if isExt
-    vp_error = clamp.(100.0*(vp - vp_truth) ./ (vp_truth + eps()), -100.0, 100.0)
+    vp_error = clamp.(100.0*(vp - vp_truth) ./ (vp_truth .+ eps()), -100.0, 100.0)
     cccvp = ccc(vp_truth, vp)
-    print_with_color(:green, "vp\n\tRMSE:\t$(sqrt(norm(vp_error)^2 / length(vp_error))) %\n")
-    print_with_color(:green, "\terrmax:\t$(maximum(abs.(vp_error))) %\n")
-    print_with_color(:green, "\tCCC:\t$cccvp\n")
+    printstyled("vp\n\tRMSE:\t$(sqrt(norm(vp_error)^2 / length(vp_error))) %\n", color=:green)
+    printstyled("\terrmax:\t$(maximum(abs.(vp_error))) %\n", color=:green)
+    printstyled("\tCCC:\t$cccvp\n", color=:green)
   end
 
   if !makeplots
@@ -204,7 +204,7 @@ end
 
 function validate(n, outdir::AbstractString; kwargs...)
   @assert n == 4 || n == 6 "n must be 4 or 6"
-  cd(Pkg.dir("DCEMRI/test/q$n"))
+  cd("$(@__DIR__)/../test/q$n")
 
   # Create noisy data
   makeQibaNoisy(n)
@@ -223,7 +223,7 @@ function validate(n, outdir::AbstractString; kwargs...)
   return (ccc, cccnoisy)
 end
 
-validate(n; kwargs...) = validate(n, Pkg.dir("DCEMRI/test/q$n"); kwargs...)
+validate(n; kwargs...) = validate(n, "$(@__DIR__)/../test/q$n"; kwargs...)
 function validate(kwargs...)
   ccc6, cccnoisy6 = validate(6; kwargs...)
   ccc4, cccnoisy4 = validate(4; kwargs...)
@@ -235,7 +235,7 @@ function makeQibaNoisy(n; nRep=10, doOverwrite=true, noiseSigma=-1.0)
 # Each voxel is also replicated 10 times
 
   # Location of noiseless data
-  inFile = Pkg.dir("DCEMRI/test/q$n/qiba$n.mat")
+  inFile = "$(@__DIR__)/../test/q$n/qiba$n.mat"
 
   # Define the output file location/name
   outFileName = basename(inFile)[1:end-4] * "noisy.mat"
@@ -251,7 +251,7 @@ function makeQibaNoisy(n; nRep=10, doOverwrite=true, noiseSigma=-1.0)
   matData = matread(inFile)
 
   # We can now make desired modifications to loaded data:
-  matData["mask"] = repeat(matData["mask"], inner=[nRep, nRep])
+  matData["mask"] = Array{UInt8,2}(repeat(matData["mask"], inner=[nRep, nRep]))
 
   # QIBA6 and QIBA4 have different needs for T1-mapping
   if (n==4)
@@ -272,7 +272,7 @@ function makeQibaNoisy(n; nRep=10, doOverwrite=true, noiseSigma=-1.0)
     noiseSigma = 0.2 * dceDat[1,1,1] / sqrt(2)
   end
   # Add complex noise
-  srand(9876543210) # Fixed arbitrary seed for reproducible noise
+  Random.seed!(9876543210) # Fixed arbitrary seed for reproducible noise
   dceDat = dceDat + noiseSigma * ( randn(size(dceDat)) + im*randn(size(dceDat)) )
   # Take the magntude of the complex signal
   dceDat = abs.(dceDat)

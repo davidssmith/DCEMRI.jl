@@ -10,16 +10,14 @@ end
 function expConv(A::Vector{Float64}, B::Float64, t::Vector{Float64})
   # Returns f = A ConvolvedWith exp(-B t)
   # Based on Flouri et al. (2016) MRM 76(3), doi: 10.1002/mrm.25991
-  n = length(t)
-  x = B * ( t[2:n] - t[1:n-1] )
-  dA = ( A[2:n] - A[1:n-1] ) ./ x
-  E = exp.(-x)
-  E0 = 1 - E
-  E1 = x - E0
-  iterAdd = A[1:n-1] .* E0 + dA .* E1
-  f = zeros(n)
-  for i in 1:n-1
-     f[i+1] = E[i]*f[i] + iterAdd[i]
+  f = zeros(length(t))
+  for i in 1:length(t)-1
+        x = B * ( t[i+1] - t[i] )
+        dA = ( A[i+1] - A[i] ) / x
+        E = exp(-x)
+        E0 = 1 - E
+        E1 = x - E0
+        f[i+1] = E*f[i] + A[i] * E0 + dA * E1
   end
   f = f / B
 end
@@ -27,7 +25,7 @@ end
 function toftskety(t::Vector{Float64}, p::Vector{Float64}, Cp::Vector{Float64})
   # Standard Tofts-Kety Model.  Works when t_dce = t_aif only, so you should
   # resample the AIF to match the DCE dynamic spacing before using.
-  Ct = zeros(t)
+  Ct = zero(t)
   kep = p[2]  # kep = Ktrans / ve
   Ct = p[1] * expConv(Cp,kep,t)
   #   for k in 1:length(Ct)

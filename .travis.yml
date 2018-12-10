@@ -2,13 +2,14 @@ language: julia
 notifications:
     email: false
 julia:
-    - 0.6
+    - 0.7
+    - 1.0
     - nightly
 #script: # use the default script which is equivalent to the following
 #    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #    - julia -e 'Pkg.init(); Pkg.clone(pwd())'
 #    - julia -e 'Pkg.test("DCEMRI", coverage=true)'
 after_success:
-    - julia -e 'cd(Pkg.dir("DCEMRI")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
-    - julia -e 'cd(Pkg.dir("DCEMRI")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+    - julia -e 'using Pkg; import DCEMRI; cd(joinpath(dirname(pathof(DCEMRI)),"../")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+    - julia -e 'using Pkg; import DCEMRI; cd(joinpath(dirname(pathof(DCEMRI)),"../")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
 

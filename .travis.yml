@@ -4,6 +4,7 @@ notifications:
 julia:
     - 0.7
     - 1.0
+    - 1.1
     - nightly
 #script: # use the default script which is equivalent to the following
 #    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi

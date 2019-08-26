@@ -1,0 +1,13 @@
+name = "DCEMRI"
+uuid = "45932f9f-84b6-5278-a79b-08413eaa523d"
+version = "0.2.1"
+author = ["David S. Smith <david.smith@gmail.com>"]
+
+[deps]
+ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
+Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+
+[compat]
+julia = "≥ 0.7.0"

@@ -9,7 +9,7 @@ export ser, r1eff, tissueconc, fitr1, fitdce, fitdata,
   defaults, ccc, nlsfit, makeplots, demo, validate
 
 const verbose = true
-const version = v"0.1.2"
+const version = v"0.2.1"
 
 if haskey(Pkg.installed(),"PyPlot")
     using PyPlot

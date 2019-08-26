@@ -1,4 +1,5 @@
 using DCEMRI
+using Test
 
 ccc4, cccnoisy4 = validate(4, makeplots=false)
 @testset "QIBA v4 Extended Tofts Phantom" begin

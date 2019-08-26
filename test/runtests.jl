@@ -1,5 +1,3 @@
-# units tests.
-using Test
 using DCEMRI
 
 ccc4, cccnoisy4 = validate(4, makeplots=false)

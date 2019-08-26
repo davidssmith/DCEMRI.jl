@@ -9,6 +9,7 @@ Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
 PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
 LsqFit = "2fda8390-95c7-5789-9bda-21331edee243"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 julia = "≥ 0.7.0"

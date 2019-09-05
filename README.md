@@ -117,9 +117,9 @@ vp CCC: 0.9717255972607232
 Validation complete. Results can be found in /Users/dss/.julia/v0.3/DCEMRI/test/q4.
 ```
 
-To perform the validation on the Quantitative Imaging Biomarkers Alliance phantoms for yourself from the original DICOMS, you will need to download the DICOMS from [Daniel Barboriak's Lab](https://dblab.duhs.duke.edu/modules/QIBAcontent/index.php?id=1).  Then the scripts in the `q4` and `q6` folders will help you translate the DICOM data to MAT files suitable for input into the Julia code.
+To perform the validation on the Quantitative Imaging Biomarkers Alliance phantoms for yourself from the original DICOMS (not necessary, see below), you will need to download the DICOMS from [Daniel Barboriak's Lab](https://sites.duke.edu/dblab/qibacontent/).  Then the scripts in the `q4` and `q6` folders will help you translate the DICOM data to MAT files suitable for input into the Julia code.
 
-I have already done this step for you and included the MAT files.  This also avoids you needing to install Python if you don't have it already.  If you want to install Python and run the scripts to convert the DICOM data to MAT files, then I recommend the [Anaconda](http://continuum.io) Python distribution. It has everything you need for scientific programming with Python.
+BUT I have already done this step for you and included the MAT files.  This also avoids you needing to install Python if you don't have it already.  If you want to install Python and run the scripts to convert the DICOM data to MAT files, then I recommend the [Anaconda](http://continuum.io) Python distribution. It has everything you need for scientific programming with Python.
 
 ## Running the In Vivo Demo
 

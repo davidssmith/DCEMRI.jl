@@ -3,38 +3,35 @@
 using MAT
 using DCEMRI
 
-# List of tests to run, in pairs
-# First run is noiseless, second run is with noise
-nList = collect([6,6,4,4])
+test_folder = @__DIR__
+phantom_ids = (4, 6) # QIBA Phantom #'s
+conditions = (:noiseless, :noisy)
 
 # Create noisy data
 DCEMRI.makeQibaNoisy(4)
 DCEMRI.makeQibaNoisy(6)
 
-for i = 1:length(nList)
-  n=nList[i]
-  # Move to test directory
-  cd(Pkg.dir("DCEMRI/test/q$n"))
-
-  # Define the input and output file/directory
-  curDx = 1
-  if mod(i,2)==1
-    datafile="qiba$n.mat"
-    outdir = Pkg.dir("DCEMRI/test/q$n") * "/results"
-    curDx = 10
+for phantom_id in phantom_ids, condition in conditions
+  if condition == :noiseless
+    mat_filename = "qiba$(phantom_id).mat"
+    results_foldername = "results_linear"
+  elseif condition == :noisy
+    mat_filename = "qiba$(phantom_id)noisy.mat"
+    results_foldername = "results_linear_noisy"
   else
-    datafile="qiba$(n)noisy.mat"
-    outdir = Pkg.dir("DCEMRI/test/q$n") * "/results_noisy"
+    error("Unknown condition: $(condition)")
   end
-  isdir(outdir) || mkdir(outdir)
-
-  models=[4]
-  if n==4
-    models=[5]
+  qiba_file = joinpath(test_folder, "q$(phantom_id)", mat_filename)
+  results_folder = joinpath(test_folder, "q$(phantom_id)", results_foldername)
+  results_file = joinpath(results_folder, "results.mat")
+  if !isdir(results_folder)
+    mkdir(results_folder)
   end
+  # The phantom contains 10x10 blocks. Noiseless phantom gobbles them into 1 block.
+  voxel_reduction_factor = (condition == :noiseless) ? 10 : 1
+  # [5] -> Linearized extended tofts model, [4] -> Linearized tofts model
+  models = (phantom_id == 4) ? [5] : [4]
 
-  results = fitdata(datafile=datafile, outfile=outdir * "/results.mat", models=models)
-
-  # Make plots and calculate summary statistics
-  DCEMRI.analyze(n, results, outdir; dx=curDx)
+  results = fitdata(datafile=qiba_file, outfile=results_file, models=models)
+  DCEMRI.analyze(phantom_id, results, results_folder; dx=voxel_reduction_factor)
 end

@@ -76,7 +76,7 @@ function fitTM(t::Vector{Float64}, Ct::Matrix{Float64}, Cp::Vector{Float64})
       pkParams[:,i] = M\Ct[:,i]
       resid[:,i] = (M*pkParams[:,i]-Ct[:,i]) / sqrt(norm(Ct[:,i]))
   end
-  r = squeeze(sum(abs2,resid,1),1) / (sT-2)
+  r = sum(resid.^2, dims=1) ./ (sT-2)
   (pkParams, r)
 end
 
@@ -96,6 +96,6 @@ function fitETM(t::Vector{Float64}, Ct::Matrix{Float64}, Cp::Vector{Float64})
       resid[:,i] = (M*pkParams[:,i]-Ct[:,i]) / sqrt(norm(Ct[:,i]))
   end
   pkParams[1,:] = pkParams[1,:] - pkParams[2,:] .* pkParams[3,:]
-  r = squeeze(sum(abs2,resid,1),1) / (sT-3)
+  r = sum(resid.^2, dims=1) ./ (sT-3)
   (pkParams, r)
 end

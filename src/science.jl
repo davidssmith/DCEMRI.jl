@@ -64,7 +64,7 @@ function fitr1(x, flip_angles::Vector{Float64}, TR::Float64,
   p0 = [maximum(x), 1.0]
   model(x,p) = spgreqn(x, p, TR)
   idxs = find(mean(x, dims=1) .> 0.1*maximum(x))
-  
+
   params, resid = nlsfit(model, x, idxs, flip_angles, p0)
   S0 = reshape(params[1,:], sizein[2:end])
   R10 = reshape(params[2,:], sizein[2:end])
@@ -92,21 +92,20 @@ function fitdce(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64},
     @dprint "attempting linearized Extended Tofts-Kety model"
     runtimeLL = @elapsed p, r = fitETM(t, Ct, Cp)
     @dprint "Fitted $nt x $nidxs points in $runtimeLL seconds"
-    println(size(r), size(p))
-    resid[:] = r
-    # Format of p = [KTrans, kep, vp]
-    # Desired form: [KTrans, ve, vp]
-    params[1,:] = p[1,:]
-    params[2,:] = p[1,:] ./ p[2,:]
-    params[3,:] = p[3,:]
-    println(size(resid), size(params))
-    modelmap[idxs] = 5
+    for k in idxs
+      if r[k] <= resid[k]
+        resid[k] = r[k]
+        params[1,k] = p[1,k]
+        params[2,k] = p[1,k] / p[2,k] # ve = Ktrans/kep (i.e. p[1]/p[2])
+        params[3,k] = p[3,k]
+        modelmap[k] = 5
+      end
+    end
   end
   if 4 in models
     @dprint "attempting linearized Standard Tofts-Kety model"
     runtimeLL = @elapsed p, r = fitTM(t, Ct, Cp)
     @dprint "Fitted $nt x $nidxs points in $runtimeLL seconds"
-    println(size(r), size(p))
     for k in idxs
       if r[k] <= resid[k]
         resid[k] = r[k]

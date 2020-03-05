@@ -167,7 +167,7 @@ function fitdce(Ct::Array{Float64,M}, mask::BitArray{N}, t::Vector{Float64},
       params[1,k] = clamp.(params[1,k], eps(), Ktmax)
       params[2:end,k] =  clamp.(params[2:end,k], eps(), 1.0)
     else
-      params[:,k] = 0.0
+      params[:,k] .= 0.0
       mask[k] = false
     end
   end

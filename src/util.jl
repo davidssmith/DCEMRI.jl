@@ -10,7 +10,7 @@ function parsefromargs()
                        "For bug reports and feature requests, file an issue at "*
                        "http://github.com/davidssmith/DCEMRI.jl"
                        )
-  @add_arg_table s begin
+  @add_arg_table! s begin
     "datafile"
     help = "path to MAT file containing DCE and T1 data"
     arg_type = ByteString

@@ -19,6 +19,11 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 julia = "≥ 1.0.0"
+ArgParse = "≥ 1.1.0"
+Calculus = "≥ 0.5.1"
+LsqFit = "≥ 0.10.0"
+MAT = "≥ 0.7.0"
+PyPlot = "≥ 2.8.2"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

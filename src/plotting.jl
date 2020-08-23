@@ -52,7 +52,7 @@ function oplot2(front::Array{Float64,2}, back::Array{Float64,2}, mask::Array{Boo
   if r == 0.0
     back[:] = 0.0
   else
-    back = (back - minimum(back)) / r
+    @. back = (back - minimum(back)) / r
   end
   n,m = size(front)
   img = zeros(n,m,3)
@@ -64,6 +64,9 @@ function oplot2(front::Array{Float64,2}, back::Array{Float64,2}, mask::Array{Boo
       img[j,k,:] = jetrgb(s)
     else
       s = back[j,k]
+      if isnan(s)
+        s = 0
+      end
       cmidx = 100 - round(Int,99.0*s)
       img[j,k,1] = s
       img[j,k,2] = s
@@ -84,8 +87,8 @@ function makeplots(mat::Dict; outdir::AbstractString="results")
   vp = mat["vp"]
   resid = mat["resid"]
   q = quantile(S0map[:], 0.99)
-  S0map[S0map .> q] = q
-  back = (S0map - minimum(S0map)) / (maximum(S0map) - minimum(S0map))
+  S0map[S0map .> q] .= q
+  back = @. (S0map - minimum(S0map)) / (maximum(S0map) - minimum(S0map))
   mask = convert(Array{Bool,2}, mat["mask"])
 
   figure(figsize=(4.5,4.5))
@@ -126,7 +129,7 @@ function makeplots(mat::Dict; outdir::AbstractString="results")
 
   figure()
   clf()
-  Ct = squeeze(maximum(Ct,1),1)
+  Ct = dropdims(maximum(Ct; dims=1); dims=1)
   x = oplot2(clamp.(Ct, 0.0, 5.0), back, mask)
   imshow(x, interpolation="nearest", cmap="jet", vmin=0, vmax=5)
   title("max tissue conc., \$C_t\$ (mmol)")

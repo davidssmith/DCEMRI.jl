@@ -233,6 +233,7 @@ function fitdata(opts::Dict)
   end
   R1 = r1eff(dcedata, R10, TR, dceflip)
   Ct = tissueconc(R1, R10, relaxivity)
+  @. Ct[!isfinite(Ct)] = 0
   params, resid, modelmap = fitdce(Ct, mask, t, Cp, models=models)
 
   results = Dict()

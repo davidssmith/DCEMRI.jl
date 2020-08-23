@@ -6,8 +6,9 @@ function demo(outdir::AbstractString="results")
   isdir(outdir) || mkdir(outdir)
   println("Processing in vivo data ...")
 
+  datafile = joinpath(dirname(pathof(DCEMRI)), "..", "demo", "invivo.mat")
   # run the model
-  results = fitdata(datafile="invivo.mat", outfile="$outdir/results.mat", models=[2])
+  results = fitdata(datafile=datafile, outfile="$outdir/results.mat", models=[2])
 
   # plot the results
   println("Plotting results ...")

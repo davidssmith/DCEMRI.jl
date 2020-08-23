@@ -64,13 +64,12 @@ function oplot2(front::Array{Float64,2}, back::Array{Float64,2}, mask::Array{Boo
       img[j,k,:] = jetrgb(s)
     else
       s = back[j,k]
-      if isnan(s)
-        s = 0
+      if !isnan(s)
+        cmidx = 100 - round(Int,99.0*s)
+        img[j,k,1] = s
+        img[j,k,2] = s
+        img[j,k,3] = s
       end
-      cmidx = 100 - round(Int,99.0*s)
-      img[j,k,1] = s
-      img[j,k,2] = s
-      img[j,k,3] = s
     end
   end
   img

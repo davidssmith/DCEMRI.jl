@@ -1,11 +1,5 @@
 function analyzer(mat::Dict, outdir::AbstractString; dx=1, makeplots=true, isExt=false)
 
-  if (makeplots==true) && !haskey(Pkg.installed(),"PyPlot")
-    # Do no make plots if PyPlot not installed
-    println("PyPlot not installed. Plots will not be produced.")
-    makeplots=false
-  end
-
   R1map = mat["R10"]
   S0map = mat["S0"]
   modelmap = mat["modelmap"]
@@ -272,7 +266,7 @@ function makeQibaNoisy(n; nRep=10, doOverwrite=true, noiseSigma=-1.0)
     noiseSigma = 0.2 * dceDat[1,1,1] / sqrt(2)
   end
   # Add complex noise
-  Random.seed!(9876543210) # Fixed arbitrary seed for reproducible noise
+  Random.seed!(8702572558940514935) # Fixed arbitrary seed for reproducible noise
   dceDat = dceDat + noiseSigma * ( randn(size(dceDat)) + im*randn(size(dceDat)) )
   # Take the magntude of the complex signal
   dceDat = abs.(dceDat)

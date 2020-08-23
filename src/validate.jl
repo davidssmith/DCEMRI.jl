@@ -218,9 +218,10 @@ function validate(n, outdir::AbstractString; kwargs...)
 end
 
 validate(n; kwargs...) = validate(n, "$(@__DIR__)/../test/q$n"; kwargs...)
-function validate(kwargs...)
+function validate(; kwargs...)
   ccc6, cccnoisy6 = validate(6; kwargs...)
   ccc4, cccnoisy4 = validate(4; kwargs...)
+  return (ccc6, cccnoisy6, ccc4, cccnoisy4)
 end
 
 

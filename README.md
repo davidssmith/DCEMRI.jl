@@ -26,11 +26,11 @@ Installation is simple.  First you need Julia.
 The simplest way to get Julia is to grab the current release version from [julialang.org](http://julialang.org/downloads/).
 
 Next you need __DCEMRI.jl__.  Open Julia. You should see a terminal window with the `julia>` prompt.  This is analogous to the command line in Matlab.
-To install __DCEMRI.jl__, run
+To install __DCEMRI.jl__, first type `]` at the prompt to get into the package shell then type:
 ```
-julia> Pkg.add("DCEMRI")
+(@v1.5) pkg> add DCEMRI 
 ```
-at the `julia>` prompt.  This might take a minute, because the validation data must be downloaded, as well as a few supporting packages.
+This might take a minute, because the validation data must be downloaded, as well as a few supporting packages.
 
 If you want to __DCEMRI.jl__ to create plots for you, you also need Python with [Matplotlib](http://matplotlib.org/) installed.
 Most OS X and Linux machines probably already have a version of Python with Matplotlib installed.

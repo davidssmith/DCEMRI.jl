@@ -1,4 +1,4 @@
-#!/Users/dss/git/julia/julia
+#!/usr/bin/julia
 #
 # This script wraps the model in a form that can be invoked from the
 # command line. You can use this to batch process files from either
@@ -6,6 +6,7 @@
 # as Matlab.
 #
 # To get the usage information, run "dcefit -h".
+
 
 using DCEMRI
 

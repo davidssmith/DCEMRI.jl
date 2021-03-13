@@ -13,12 +13,12 @@ function parsefromargs()
   @add_arg_table! s begin
     "datafile"
     help = "path to MAT file containing DCE and T1 data"
-    arg_type = ByteString
+    arg_type = String
     #required = true
     default = "input.mat"
     "--outfile", "-O"
     help = "path to MAT file to contain the ouput"
-    arg_type = ByteString
+    arg_type = String
     default = "results.mat"
     "--relaxivity", "-R"
     help = "contrast agent relaxivity (1/s)"

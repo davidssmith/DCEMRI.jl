@@ -9,6 +9,7 @@
 
 
 using DCEMRI
+using Distributed
 
 params = length(ARGS) > 0 ? DCEMRI.parsefromargs() : defaultdict()
 

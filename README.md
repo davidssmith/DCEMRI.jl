@@ -6,7 +6,6 @@ A Fast, Validated Open Source Toolkit for Dynamic Contrast Enhanced MRI Analysis
 This is the repository for the paper published in PeerJ: [DCEMRI.jl: a fast, validated, open source toolkit for dynamic contrast enhanced MRI analysis](https://peerj.com/articles/909/).
 
 [![DOI](https://zenodo.org/badge/11904/davidssmith/DCEMRI.jl.svg)](http://dx.doi.org/10.5281/zenodo.16744)
-[![Build Status](https://travis-ci.com/davidssmith/DCEMRI.jl.png?branch=master)](https://travis-ci.org/davidssmith/DCEMRI.jl)
 [![Build
 status](https://ci.appveyor.com/api/projects/status/ug54q1jfmhwlw0vm?svg=true)](https://ci.appveyor.com/project/davidssmith/dcemri-jl)
 [![Coverage
@@ -253,3 +252,4 @@ To keep your installation of __DCEMRI.jl__ up to date, periodically run `Pkg.upd
 This project was funded by the National Cancer Institute of the National Institutes of Health, under Award Numbers K25CA176219, U01CA142565, R01CA129961, R25CA092043. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health.
 
 [![Analytics](https://ga-beacon.appspot.com/UA-57394339-1/DCEMRI.jl/README.md?pixel)](https://github.com/igrigorik/ga-beacon)
+

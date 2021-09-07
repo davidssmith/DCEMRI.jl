@@ -200,9 +200,6 @@ function validate(n, outdir::AbstractString; kwargs...)
   @assert n == 4 || n == 6 "n must be 4 or 6"
   cd("$(@__DIR__)/../test/q$n")
 
-  # Create noisy data
-  makeQibaNoisy(n)
-
   println("Running analysis of noise-free QIBA v$n data ...")
   isdir("$outdir/results") || mkdir("$outdir/results")
   results = fitdata(datafile="qiba$n.mat",outfile="$outdir/results/results.mat",save=false)
@@ -222,61 +219,4 @@ function validate(; kwargs...)
   ccc6, cccnoisy6 = validate(6; kwargs...)
   ccc4, cccnoisy4 = validate(4; kwargs...)
   return (ccc6, cccnoisy6, ccc4, cccnoisy4)
-end
-
-
-function makeQibaNoisy(n; nRep=10, doOverwrite=true, noiseSigma=-1.0)
-# Purpose: Reads in noiseless QIBA data and outputs noisy version
-# Each voxel is also replicated 10 times
-
-  # Location of noiseless data
-  inFile = "$(@__DIR__)/../test/q$n/qiba$n.mat"
-
-  # Define the output file location/name
-  outFileName = basename(inFile)[1:end-4] * "noisy.mat"
-  outFile = joinpath( dirname(inFile), outFileName )
-
-  if ( isfile(outFile) && ~doOverwrite )
-    # If output file already exists and we do not want to overwrite ...
-    return # ... then end it right here
-  end
-
-  println("Producing noisy version of $inFile")
-  # Load data
-  matData = matread(inFile)
-
-  # We can now make desired modifications to loaded data:
-  matData["mask"] = Array{UInt8,2}(repeat(matData["mask"], inner=[nRep, nRep]))
-
-  # QIBA6 and QIBA4 have different needs for T1-mapping
-  if (n==4)
-    # First dim of T1data is the flip angles which won't be repeated
-    matData["T1data"] = repeat(matData["T1data"], inner=[1, nRep, nRep])
-  else
-    matData["S0"] = repeat(matData["S0"], inner=[nRep, nRep])
-    matData["R10"] = repeat(matData["R10"], inner=[nRep, nRep])
-  end
-
-  # Special treatment for DCE data
-  # First, use an easier-to-type variable name
-  dceDat = matData["DCEdata"]
-  # Repeat each element the desired number of times
-  dceDat = repeat(dceDat, inner=[1, nRep, nRep]) # First dim is time, not repeated
-  # Default noise = arbitraryWeight * baselineSignal / sqrt(2)
-  if (noiseSigma < 0)
-    noiseSigma = 0.2 * dceDat[1,1,1] / sqrt(2)
-  end
-  # Add complex noise
-  Random.seed!(8702572558940514935) # Fixed arbitrary seed for reproducible noise
-  dceDat = dceDat + noiseSigma * ( randn(size(dceDat)) + im*randn(size(dceDat)) )
-  # Take the magntude of the complex signal
-  dceDat = abs.(dceDat)
-  # Replace noiseless data with noisy data
-  matData["DCEdata"] = dceDat
-
-  # Save modified data to disk
-  matwrite(outFile, matData)
-  println("Noisy data saved to $outFile")
-
-  return
 end

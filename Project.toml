@@ -1,7 +1,7 @@
 name = "DCEMRI"
 uuid = "2b3899e7-9068-5c5c-a4f4-f7d195ee295c"
 author = ["David S. Smith <david.smith@gmail.com>"]
-version = "0.2.3"
+version = "0.2.4"
 
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
